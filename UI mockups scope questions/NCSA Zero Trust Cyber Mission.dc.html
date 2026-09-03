@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#e7e9f0;font-family:'Noto Sans Thai','Chakra Petch',system-ui,sans-serif}
+*{box-sizing:border-box}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.2);border-radius:4px}
+a{color:#35d0ff}a:hover{color:#7de4ff}
+@keyframes ncsa-spin{to{transform:rotate(360deg)}}
+@keyframes ncsa-alertpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,77,77,.5)}50%{box-shadow:0 0 0 14px rgba(255,77,77,0)}}
+@keyframes ncsa-fadein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ncsa-fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ncsa-popin{0%{opacity:0;transform:scale(.4)}100%{opacity:1;transform:scale(1)}}
+@keyframes ncsa-shieldfill{from{width:0%}to{width:82%}}
+:root{--card-w:680px;--pad-x:16px;--pad-top:36px;--single-cols:1fr}
+@media (min-width:860px){:root{--card-w:900px;--pad-x:32px;--pad-top:56px;--single-cols:1fr 1fr}}
+</style>
+</helmet>
+
+<div style="width:100%;min-height:100vh;background:#e7e9f0">
+
+  <div style="position:sticky;top:0;z-index:50;background:#0b1024;border-bottom:1px solid rgba(255,255,255,.08);padding:14px 20px;display:flex;align-items:center;gap:18px;overflow-x:auto">
+    <div style="display:flex;align-items:center;gap:8px;flex:none">
+      <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#1c2f7a,#e2231c);display:flex;align-items:center;justify-content:center;font:700 12px 'Chakra Petch';color:#fff">N</div>
+      <div style="font:700 14px 'Chakra Petch';color:#fff;white-space:nowrap">NCSA · Zero Trust Cyber Mission — Player (Web + Mobile)</div>
+    </div>
+  </div>
+
+  <div style="padding:var(--pad-top) var(--pad-x) 80px;display:flex;flex-direction:column;align-items:center;gap:16px;max-width:calc(var(--card-w) + 60px);margin:0 auto;width:100%">
+    <div style="font:600 11px 'Chakra Petch';letter-spacing:.08em;color:rgba(20,20,30,.45);text-transform:uppercase">{{ activeLabel }}</div>
+
+    <!-- JOIN + LOBBY -->
+    <sc-if value="{{ isJoin }}" hint-placeholder-val="{{ true }}">
+      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#12205c,#1c2f7a);min-height:760px;display:flex;flex-direction:column;color:#fff;font-family:'Chakra Petch'">
+
+          <sc-if value="{{ isPinStep }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:28px 24px 18px;text-align:center;border-bottom:1px solid rgba(255,255,255,.12);animation:ncsa-fadeup .5s ease-out backwards">
+              <div style="font:700 13px 'Chakra Petch';letter-spacing:.1em;opacity:.7">NCSA CYBER MISSION</div>
+              <div style="font:600 12px 'Noto Sans Thai';opacity:.55;margin-top:4px">กรอก Game PIN เพื่อเข้าร่วม</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:26px 24px;animation:ncsa-fadeup .5s ease-out .1s backwards">
+              <div style="font:700 13px 'Chakra Petch';opacity:.6;letter-spacing:.08em">GAME PIN</div>
+              <input type="text" value="{{ pinInput }}" onChange="{{ onPinChange }}" placeholder="000000" style="width:220px;text-align:center;font:700 32px 'Chakra Petch';letter-spacing:.08em;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:12px;color:#fff;padding:14px"></input>
+              <sc-if value="{{ joinError }}" hint-placeholder-val="{{ false }}">
+                <div style="font:600 12px 'Noto Sans Thai';color:#ff8a80">{{ joinError }}</div>
+              </sc-if>
+            </div>
+            <div style="padding:18px 24px 26px;animation:ncsa-fadeup .5s ease-out .2s backwards">
+              <button onClick="{{ goNameStep }}" style="width:100%;padding:15px;border:none;border-radius:12px;background:#e2231c;color:#fff;font:700 14px 'Chakra Petch';letter-spacing:.04em">เข้าร่วมห้อง →</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isNameStep }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:28px 24px 18px;text-align:center;border-bottom:1px solid rgba(255,255,255,.12);animation:ncsa-fadeup .5s ease-out backwards">
+              <div style="font:700 13px 'Chakra Petch';letter-spacing:.1em;opacity:.7">NCSA CYBER MISSION</div>
+              <div style="font:600 12px 'Noto Sans Thai';opacity:.55;margin-top:4px">PIN {{ pinDisplay }} · กรอกชื่อเพื่อเข้าร่วม</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:26px 24px;animation:ncsa-fadeup .5s ease-out .1s backwards">
+              <div style="font:700 13px 'Chakra Petch';opacity:.6;letter-spacing:.08em">ตั้งชื่อผู้เล่น</div>
+              <input type="text" value="{{ nameInput }}" onChange="{{ onNameChange }}" placeholder="ชื่อผู้เล่นของคุณ" style="width:220px;text-align:center;font:600 15px 'Noto Sans Thai';background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:12px;color:#fff;padding:14px"></input>
+              <div style="font:500 12px 'Noto Sans Thai';opacity:.6;text-align:center">ชื่อนี้จะแสดงให้ผู้เล่นคนอื่นเห็นในห้อง</div>
+            </div>
+            <div style="padding:18px 24px 26px">
+              <button onClick="{{ goPinLobby }}" style="width:100%;padding:15px;border:none;border-radius:12px;background:#e2231c;color:#fff;font:700 14px 'Chakra Petch';letter-spacing:.04em">ยืนยันและเข้าร่วม →</button>
+            </div>
+          </sc-if>
+
+          <div style="{{ lobbyStepStyle }}">
+            <div style="padding:28px 24px 18px;text-align:center;border-bottom:1px solid rgba(255,255,255,.12)">
+              <div style="font:700 13px 'Chakra Petch';letter-spacing:.1em;opacity:.7">NCSA CYBER MISSION</div>
+              <div style="font:600 12px 'Noto Sans Thai';opacity:.55;margin-top:4px">เข้าร่วมห้องสำเร็จ · PIN {{ pinDisplay }}</div>
+            </div>
+            <div style="padding:26px 24px 10px;display:flex;flex-direction:column;align-items:center;gap:10px">
+              <div style="width:56px;height:56px;border-radius:50%;background:rgba(46,204,113,.15);border:2px solid #2ecc71;display:flex;align-items:center;justify-content:center;font:700 22px 'Chakra Petch';color:#2ecc71">✓</div>
+              <div style="font:700 16px 'Chakra Petch'">{{ myPlayerName }}</div>
+            </div>
+            <div style="padding:16px 24px;flex:1;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center">
+              <div style="font:600 13px 'Chakra Petch';color:rgba(255,255,255,.7)">รอผู้เล่นคนอื่นและโฮสต์เริ่มเกม...</div>
+              <div style="font:600 12px 'Chakra Petch';color:#7de4ff">{{ lobbyCount }} คนเข้าร่วมแล้ว</div>
+            </div>
+            <div style="padding:18px 24px 26px;display:flex;align-items:center;justify-content:center;gap:10px">
+              <div style="width:18px;height:18px;border-radius:50%;border:3px solid rgba(255,255,255,.2);border-top-color:#35d0ff;animation:ncsa-spin 1s linear infinite"></div>
+              <div style="font:600 12px 'Chakra Petch';color:rgba(255,255,255,.6)">รอโฮสต์เริ่มเกมจาก Admin Console</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- LOADING -->
+    <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:480px;margin:0 auto">
+        <div style="border-radius:16px;background:#0a0e1a;color:#fff;padding:60px 40px;text-align:center">
+          <div style="width:64px;height:64px;border-radius:50%;border:4px solid rgba(255,255,255,.15);border-top-color:#35d0ff;margin:0 auto;animation:ncsa-spin 1s linear infinite"></div>
+          <div style="font:700 18px 'Chakra Petch';margin-top:24px">กำลังเตรียมภารกิจ...</div>
+          <div style="font:600 13px 'Chakra Petch';color:#35d0ff;margin-top:8px">{{ loadingSeconds }}s</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ALERT + BRIEFING -->
+    <sc-if value="{{ isAlert }}" hint-placeholder-val="{{ true }}">
+      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:760px;display:flex;flex-direction:column;color:#fff">
+          <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)">
+            <div style="font:600 11px 'Chakra Petch';letter-spacing:.06em;color:rgba(255,255,255,.5)">{{ roundLabel }}</div>
+            <div style="font:700 11px 'Chakra Petch';color:#ff4d4d">{{ riskLabel }}</div>
+          </div>
+          <div style="padding:22px 20px;display:flex;flex-direction:column;gap:6px;align-items:center;background:radial-gradient(circle at 50% 0%,rgba(255,77,77,.18),transparent 70%)">
+            <div style="width:64px;height:64px;border-radius:50%;border:3px solid #ff4d4d;display:flex;align-items:center;justify-content:center;font:700 26px 'Chakra Petch';color:#ff4d4d;animation:ncsa-alertpulse 1.6s ease-in-out infinite">!</div>
+            <div style="font:700 17px 'Chakra Petch';text-align:center;margin-top:6px;animation:ncsa-fadein .5s ease-out">MISSION ALERT</div>
+            <div style="font:600 14px 'Noto Sans Thai';text-align:center;color:#ffb3ad;animation:ncsa-fadein .6s ease-out .1s backwards">{{ roundPrincipleLabel }}</div>
+          </div>
+          <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px;animation:ncsa-fadeup .6s ease-out .2s backwards">
+            <div style="font:700 12px 'Chakra Petch';letter-spacing:.06em;color:rgba(255,255,255,.55)">SITUATION BRIEFING</div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;font:500 13px 'Noto Sans Thai';color:rgba(255,255,255,.85);line-height:1.9">{{ briefingNarrative }}</div>
+          </div>
+          <div style="padding:16px 20px 26px;margin-top:auto">
+            <button onClick="{{ goDecision }}" style="width:100%;padding:15px;border:none;border-radius:12px;background:#e2231c;color:#fff;font:700 14px 'Chakra Petch';letter-spacing:.04em">ไปยัง Security Decision →</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- DECISION -->
+    <sc-if value="{{ isDecision }}" hint-placeholder-val="{{ true }}">
+      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:800px;display:flex;flex-direction:column;color:#fff">
+          <div style="padding:14px 20px 10px;border-bottom:1px solid rgba(255,255,255,.08);animation:ncsa-fadeup .5s ease-out backwards">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font:700 16px 'Chakra Petch'">Security Decision</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="{{ timeLeftStyle }}">{{ timeLeft }}s</div>
+                <button onClick="{{ toggleMissionPopup }}" style="padding:7px 12px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.06);color:#fff;font:600 11px 'Chakra Petch';cursor:pointer">Show Mission</button>
+              </div>
+            </div>
+            <div style="font:600 11px 'Chakra Petch';color:#35d0ff;margin-top:12px">{{ patternHeading }}</div>
+          </div>
+
+          <sc-if value="{{ isPatternSingle }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;animation:ncsa-fadeup .4s ease-out backwards">
+              <div style="font:500 11.5px 'Noto Sans Thai';color:rgba(255,255,255,.5)">เลือกมาตรการที่เหมาะสมที่สุด — เลือกได้ 1 ข้อ</div>
+              <div style="display:grid;grid-template-columns:var(--single-cols);gap:10px">
+                <sc-for list="{{ singleActionsView }}" as="a" hint-placeholder-count="4">
+                  <button onClick="{{ a.onClick }}" style="{{ a.cardStyle }}">
+                    <div style="{{ a.shapeStyle }}">{{ a.shapeIcon }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font:700 13.5px 'Chakra Petch';color:#fff;text-align:left">{{ a.title }}</div>
+                      <div style="font:500 12px 'Noto Sans Thai';color:rgba(255,255,255,.65);margin-top:6px;text-align:left">{{ a.desc }}</div>
+                      <div style="font:500 11px 'Noto Sans Thai';color:rgba(255,255,255,.4);margin-top:8px;text-align:left">ผลที่อาจเกิดขึ้น: {{ a.effect }}</div>
+                    </div>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPatternMulti }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;animation:ncsa-fadeup .4s ease-out backwards">
+              <div style="font:500 11.5px 'Noto Sans Thai';color:rgba(255,255,255,.5)">เลือกมาตรการป้องกัน {{ requiredCount }} รายการ</div>
+              <div style="font:700 12px 'Chakra Petch';color:#35d0ff">เลือกแล้ว {{ multiCount }} / {{ requiredCount }}</div>
+              <div style="display:grid;grid-template-columns:var(--single-cols);gap:10px">
+                <sc-for list="{{ multiActionsView }}" as="m" hint-placeholder-count="5">
+                  <button onClick="{{ m.onClick }}" style="{{ m.cardStyle }}">
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <div style="{{ m.checkStyle }}"></div>
+                      <div style="font:600 13px 'Chakra Petch';text-align:left;color:#fff">{{ m.title }}</div>
+                    </div>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPatternSequence }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;animation:ncsa-fadeup .4s ease-out backwards">
+              <div style="font:500 11.5px 'Noto Sans Thai';color:rgba(255,255,255,.5)">เรียงลำดับการรับมือให้ถูกต้อง</div>
+              <sc-for list="{{ sequenceView }}" as="s" hint-placeholder-count="5">
+                <div draggable="true" onDragStart="{{ s.onDragStart }}" onDragOver="{{ s.onDragOver }}" onDrop="{{ s.onDrop }}" onDragEnd="{{ s.onDragEnd }}" style="{{ s.rowStyle }}">
+                  <div style="width:24px;height:24px;border-radius:6px;background:rgba(53,208,255,.15);color:#35d0ff;display:flex;align-items:center;justify-content:center;font:700 12px 'Chakra Petch';flex:none">{{ s.pos }}</div>
+                  <div style="font:600 12.5px 'Noto Sans Thai';flex:1">{{ s.label }}</div>
+                  <div style="font:700 14px 'Chakra Petch';color:rgba(255,255,255,.3);cursor:grab;flex:none">⠿</div>
+                  <div style="display:flex;flex-direction:column;gap:2px">
+                    <button onClick="{{ s.up }}" style="background:rgba(255,255,255,.08);border:none;color:#fff;width:22px;height:18px;border-radius:4px;font:700 10px 'Chakra Petch';cursor:pointer">▲</button>
+                    <button onClick="{{ s.down }}" style="background:rgba(255,255,255,.08);border:none;color:#fff;width:22px;height:18px;border-radius:4px;font:700 10px 'Chakra Petch';cursor:pointer">▼</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPatternRisk }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px;animation:ncsa-fadeup .4s ease-out backwards">
+              <div style="font:500 11.5px 'Noto Sans Thai';color:rgba(255,255,255,.5)">วิเคราะห์หลักฐานและประเมินความเสี่ยง</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <sc-for list="{{ riskLevelsView }}" as="rl" hint-placeholder-count="4">
+                  <button onClick="{{ rl.onClick }}" style="{{ rl.style }}">{{ rl.label }}</button>
+                </sc-for>
+              </div>
+              <sc-if value="{{ hasRiskLevel }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+                  <div style="font:600 12px 'Chakra Petch';color:#35d0ff">เลือกมาตรการรับมือ</div>
+                  <sc-for list="{{ riskActionsView }}" as="ra" hint-placeholder-count="3">
+                    <button onClick="{{ ra.onClick }}" style="{{ ra.cardStyle }}">
+                      <div style="font:700 13px 'Chakra Petch';text-align:left;color:#fff">{{ ra.title }}</div>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPatternDefense }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:16px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;animation:ncsa-fadeup .4s ease-out backwards">
+              <div style="font:500 11.5px 'Noto Sans Thai';color:rgba(255,255,255,.5);align-self:flex-start">ตอบคำถามในแต่ละมาตรการให้ถูกต้องเพื่อปลดล็อกและวางมาตรการป้องกัน</div>
+              <div style="font:700 12px 'Chakra Petch';color:#35d0ff;align-self:flex-start">ปลดล็อกแล้ว {{ deployedCount }} / {{ totalLayers }}</div>
+              <div style="position:relative;width:100%;max-width:460px;aspect-ratio:1/1;background:radial-gradient(circle at 50% 50%,rgba(53,208,255,.07),transparent 70%)">
+                <svg width="100%" height="100%" viewBox="0 0 460 460" style="position:absolute;top:0;left:0">
+                  <sc-for list="{{ defenseLinesView }}" as="ln" hint-placeholder-count="7">
+                    <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" style="{{ ln.style }}"></line>
+                  </sc-for>
+                </svg>
+                <div style="{{ hubStyle }}">
+                  <div style="font:700 9px 'Chakra Petch';color:rgba(255,255,255,.6);letter-spacing:.05em">SHIELD</div>
+                  <div style="font:700 22px 'Chakra Petch';color:#35d0ff">{{ shieldPct }}%</div>
+                </div>
+                <sc-for list="{{ defenseLayersView }}" as="l" hint-placeholder-count="7">
+                  <button onClick="{{ l.onClick }}" style="{{ l.nodeStyle }}">
+                    <div style="{{ l.iconStyle }}">{{ l.icon }}</div>
+                    <div style="font:600 9.5px 'Chakra Petch';color:#fff;text-align:center;margin-top:6px;line-height:1.25">{{ l.label }}</div>
+                    <div style="{{ l.statusStyle }}">{{ l.statusLabel }}</div>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="padding:16px 20px 26px;margin-top:auto">
+            <button onClick="{{ stepPrimaryAction }}" disabled="{{ cannotSubmit }}" style="{{ submitStyle }}">{{ stepPrimaryLabel }}</button>
+          </div>
+        </div>
+      </div>
+
+      <sc-if value="{{ hasDetailLayer }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ closeLayerDetail }}" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:70;padding:20px">
+          <div onClick="{{ stopPropagation }}" style="width:420px;max-width:90vw;background:#12151f;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:28px;color:#fff;box-shadow:0 30px 60px -20px rgba(0,0,0,.6)">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:44px;height:44px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:18px;background:radial-gradient(circle at 30% 28%,#7fe6ff,#0f7fb0 60%,#062a3a 100%);box-shadow:inset 0 1px 2px rgba(255,255,255,.5),inset 0 -3px 6px rgba(0,0,0,.4)">{{ detailLayerView.icon }}</div>
+              <div style="font:700 16px 'Chakra Petch'">{{ detailLayerView.label }}</div>
+            </div>
+
+            <sc-if value="{{ detailLayerView.stepQ1 }}" hint-placeholder-val="{{ true }}">
+              <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+                <div style="font:700 12px 'Chakra Petch';color:#35d0ff">โจทย์ที่ 1 / 2 — แนวคิด</div>
+                <div style="font:600 12.5px 'Noto Sans Thai';color:rgba(255,255,255,.85)">{{ detailLayerView.question }}</div>
+                <sc-for list="{{ detailLayerView.optionsView }}" as="opt" hint-placeholder-count="4">
+                  <button onClick="{{ opt.onClick }}" style="{{ opt.style }}">{{ opt.label }}</button>
+                </sc-for>
+                <sc-if value="{{ detailLayerView.taskDone }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:4px;padding:10px 12px;border-radius:8px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);font:500 12px 'Noto Sans Thai';color:#c8ffe1;line-height:1.6">{{ detailLayerView.reason }}</div>
+                  <button onClick="{{ detailLayerView.ackNext }}" style="margin-top:4px;padding:10px 12px;border:none;border-radius:8px;background:#2ecc71;color:#062a1a;font:700 12px 'Chakra Petch';cursor:pointer">ถัดไป: โจทย์ที่ 2 →</button>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ detailLayerView.stepQ2 }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+                <div style="font:700 12px 'Chakra Petch';color:#ff8a3d">โจทย์ที่ 2 / 2 — การตั้งค่า</div>
+                <div style="font:600 12.5px 'Noto Sans Thai';color:rgba(255,255,255,.85)">{{ detailLayerView.setupQuestion }}</div>
+                <sc-for list="{{ detailLayerView.setupOptionsView }}" as="opt" hint-placeholder-count="4">
+                  <button onClick="{{ opt.onClick }}" style="{{ opt.style }}">{{ opt.label }}</button>
+                </sc-for>
+                <sc-if value="{{ detailLayerView.setupTaskDone }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:4px;padding:10px 12px;border-radius:8px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);font:500 12px 'Noto Sans Thai';color:#c8ffe1;line-height:1.6">{{ detailLayerView.setupReason }}</div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ detailLayerView.deployed }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:18px;padding:12px;border-radius:10px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);font:700 12px 'Chakra Petch';color:#2ecc71">✓ ปลดล็อกมาตรการนี้แล้ว</div>
+            </sc-if>
+
+            <div style="display:flex;gap:10px;margin-top:24px">
+              <button onClick="{{ closeLayerDetail }}" style="flex:1;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:transparent;color:#fff;font:700 12.5px 'Chakra Petch';cursor:pointer">ปิด</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showFinalConfirm }}" hint-placeholder-val="{{ false }}">
+        <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:60;padding:20px">
+          <div style="width:380px;max-width:100%;background:#12151f;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:26px;color:#fff;box-shadow:0 30px 60px -20px rgba(0,0,0,.6)">
+            <div style="font:700 16px 'Chakra Petch'">ยืนยันการส่งคำตอบ</div>
+            <div style="font:500 12.5px 'Noto Sans Thai';color:rgba(255,255,255,.7);margin-top:10px;line-height:1.7">เมื่อยืนยันแล้วจะไม่สามารถแก้ไขคำตอบได้อีก และระบบจะส่งคำตอบของคุณไปคำนวณคะแนน ต้องการยืนยันหรือไม่?</div>
+            <div style="display:flex;gap:10px;margin-top:22px">
+              <button onClick="{{ cancelFinalConfirm }}" style="flex:1;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:transparent;color:#fff;font:700 12.5px 'Chakra Petch';cursor:pointer">กลับไปแก้ไข</button>
+              <button onClick="{{ confirmFinal }}" style="flex:1;padding:12px;border:none;border-radius:10px;background:#e2231c;color:#fff;font:700 12.5px 'Chakra Petch';cursor:pointer">ยืนยันส่งคำตอบ</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showMissionPopup }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ closeMissionPopup }}" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:60;padding:20px">
+          <div onClick="{{ stopPropagation }}" style="width:100%;max-width:480px;background:#0a0e1a;border:1px solid rgba(255,255,255,.1);border-radius:16px;overflow:hidden;color:#fff;box-shadow:0 30px 60px -20px rgba(0,0,0,.6)">
+            <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)">
+              <div style="font:600 11px 'Chakra Petch';letter-spacing:.06em;color:rgba(255,255,255,.5)">{{ roundLabel }}</div>
+              <div style="font:700 11px 'Chakra Petch';color:#ff4d4d">{{ riskLabel }}</div>
+            </div>
+            <div style="padding:22px 20px;display:flex;flex-direction:column;gap:6px;align-items:center;background:radial-gradient(circle at 50% 0%,rgba(255,77,77,.18),transparent 70%)">
+              <div style="width:56px;height:56px;border-radius:50%;border:3px solid #ff4d4d;display:flex;align-items:center;justify-content:center;font:700 22px 'Chakra Petch';color:#ff4d4d;animation:ncsa-alertpulse 1.6s ease-in-out infinite">!</div>
+              <div style="font:700 15px 'Chakra Petch';text-align:center;margin-top:6px">MISSION ALERT</div>
+              <div style="font:600 12.5px 'Noto Sans Thai';text-align:center;color:#ffb3ad">{{ roundPrincipleLabel }}</div>
+            </div>
+            <div style="padding:18px 20px;display:flex;flex-direction:column;gap:10px">
+              <div style="font:700 11px 'Chakra Petch';letter-spacing:.06em;color:rgba(255,255,255,.55)">SITUATION BRIEFING</div>
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;font:500 12.5px 'Noto Sans Thai';color:rgba(255,255,255,.85);line-height:1.8">{{ briefingNarrative }}</div>
+            </div>
+            <div style="padding:0 20px 20px">
+              <button onClick="{{ closeMissionPopup }}" style="width:100%;padding:13px;border:none;border-radius:10px;background:#e2231c;color:#fff;font:700 13px 'Chakra Petch';cursor:pointer">ปิด</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+    <sc-if value="{{ isWaiting }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:400px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:16px;padding:40px 24px">
+          <div style="width:56px;height:56px;border-radius:50%;border:4px solid rgba(255,255,255,.15);border-top-color:#35d0ff;animation:ncsa-spin 1s linear infinite"></div>
+          <div style="font:700 15px 'Chakra Petch';text-align:center">ส่งคำตอบแล้ว — รอผู้เล่นคนอื่น</div>
+          <div style="font:500 12.5px 'Noto Sans Thai';color:rgba(255,255,255,.55);text-align:center;line-height:1.7">ระบบจะไปยังหน้าคำตอบเมื่อโฮสต์กดดูคำตอบจากหน้า Admin Console</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- OUTCOME -->
+    <sc-if value="{{ isOutcome }}" hint-placeholder-val="{{ true }}">
+      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:760px;display:flex;flex-direction:column;color:#fff;align-items:center">
+          <div style="padding:40px 24px 18px;display:flex;flex-direction:column;align-items:center;gap:14px">
+            <div style="{{ outcomeIconStyle }}">{{ outcomeIcon }}</div>
+            <div style="font:700 20px 'Chakra Petch';text-align:center;animation:ncsa-fadeup .5s ease-out .15s backwards">{{ outcomeTitle }}</div>
+            <div style="font:600 13px 'Noto Sans Thai';color:rgba(255,255,255,.6);text-align:center;animation:ncsa-fadeup .5s ease-out .25s backwards">{{ roundResult.choiceText }}</div>
+          </div>
+          <div style="width:100%;padding:20px 24px;display:flex;flex-direction:column;gap:14px;animation:ncsa-fadeup .5s ease-out .35s backwards">
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:16px">
+              <div style="font:600 11px 'Chakra Petch';letter-spacing:.05em;color:rgba(255,255,255,.5)">คะแนนรอบนี้ / คะแนนสะสม</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+                <div style="font:700 20px 'Chakra Petch';color:#2ecc71">{{ roundResult.points }}</div>
+                <div style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.1);position:relative">
+                  <div style="{{ outcomeBarStyle }}"></div>
+                </div>
+                <div style="font:700 20px 'Chakra Petch';color:#35d0ff">{{ roundResult.yourScore }}</div>
+              </div>
+              <sc-if value="{{ showSpeedBonus }}" hint-placeholder-val="{{ false }}">
+                <div style="font:500 11px 'Noto Sans Thai';color:#7de4ff;margin-top:8px">⚡ {{ speedBonusLabel }}</div>
+              </sc-if>
+            </div>
+            <div style="background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);border-radius:12px;padding:14px;font:500 12.5px 'Noto Sans Thai';color:#c8ffe1;line-height:1.6">{{ roundResult.explanation }}</div>
+
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font:600 11px 'Chakra Petch';letter-spacing:.05em;color:rgba(255,255,255,.5)">มาตรการที่แนะนำสำหรับสถานการณ์นี้</div>
+              <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:12px">
+                <div style="font:600 12px 'Noto Sans Thai';color:#fff">{{ roundResult.recommended }}</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:16px 24px 26px;margin-top:auto;width:100%">
+            <button onClick="{{ goDebrief }}" style="width:100%;padding:15px;border:none;border-radius:12px;background:#e2231c;color:#fff;font:700 14px 'Chakra Petch';letter-spacing:.04em">ดู Security Debrief →</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- DEBRIEF -->
+    <sc-if value="{{ isDebrief }}" hint-placeholder-val="{{ true }}">
+      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:800px;display:flex;flex-direction:column;color:#fff">
+          <div style="padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08)">
+            <div style="font:700 17px 'Chakra Petch'">ผลคะแนนจาก Leaderboard</div>
+            <div style="font:500 11.5px 'Noto Sans Thai';color:rgba(255,255,255,.5);margin-top:4px">{{ roundLabel }}</div>
+          </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto">
+            <div style="background:linear-gradient(135deg,rgba(53,208,255,.15),rgba(53,208,255,.04));border:1px solid rgba(53,208,255,.35);border-radius:14px;padding:18px;text-align:center;animation:ncsa-fadeup .5s ease-out backwards">
+              <div style="font:600 10px 'Chakra Petch';letter-spacing:.05em;color:rgba(255,255,255,.55)">อันดับของคุณ</div>
+              <div style="font:700 40px 'Chakra Petch';color:#35d0ff;margin-top:4px">#{{ myRank }}</div>
+              <div style="display:flex;justify-content:center;gap:24px;margin-top:10px">
+                <div>
+                  <div style="font:700 20px 'Chakra Petch';color:#2ecc71">{{ myScore }}</div>
+                  <div style="font:600 9px 'Chakra Petch';color:rgba(255,255,255,.5);letter-spacing:.05em">SCORE</div>
+                </div>
+              </div>
+            </div>
+            <div style="font:600 10px 'Chakra Petch';letter-spacing:.05em;color:rgba(255,255,255,.5);margin-top:4px">LEADERBOARD ทั้งหมด</div>
+            <sc-for list="{{ leaderboardRowsView }}" as="lb" hint-placeholder-count="5">
+              <div style="{{ lb.rowStyle }}">
+                <div style="{{ lb.rankBadgeStyle }}">{{ lb.rank }}</div>
+                <div style="flex:1;font:600 13px 'Chakra Petch';color:#fff">{{ lb.name }}</div>
+                <div style="font:700 15px 'Chakra Petch';color:#fff">{{ lb.score }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:16px 20px 26px;margin-top:auto;display:flex;align-items:center;justify-content:center;gap:10px">
+            <sc-if value="{{ isGameOver }}" hint-placeholder-val="{{ false }}">
+              <div style="font:700 13px 'Chakra Petch';color:rgba(255,255,255,.7)">จบเกม — ขอบคุณที่เข้าร่วมภารกิจ</div>
+            </sc-if>
+            <sc-if value="{{ isWaitingNextRound }}" hint-placeholder-val="{{ true }}">
+              <div style="width:16px;height:16px;border-radius:50%;border:3px solid rgba(255,255,255,.2);border-top-color:#35d0ff;animation:ncsa-spin 1s linear infinite"></div>
+              <div style="font:600 12px 'Chakra Petch';color:rgba(255,255,255,.6)">รอโฮสต์เริ่มภารกิจถัดไป</div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    activeScreen: 'join',
+    joinStep: 'pin',
+    pinInput: '',
+    nameInput: '',
+    joinError: '',
+    pin: null,
+    myPlayerName: '',
+    lobbyCount: 0,
+    loadingSeconds: 5,
+    roundMission: null,
+    roundIndex: -1,
+    totalRounds: 0,
+    isLastRoundLive: false,
+    selectedActionId: null,
+    multiSelected: [],
+    riskLevel: null,
+    riskActionId: null,
+    sequenceOrder: [],
+    dragIndex: null,
+    layerAnswers: {},
+    deployedLayers: [],
+    completedTasks: [],
+    completedSetupTasks: [],
+    ackedQ1: [],
+    detailLayerId: null,
+    taskWrongId: null,
+    setupWrongId: null,
+    showFinalConfirm: false,
+    showMissionPopup: false,
+    roundResult: null,
+    leaderboard: [],
+    isGameOver: false,
+    timeLeft: 0
+  };
+
+  interactionLabels = {single:'เลือกมาตรการ', multi:'เลือกหลายมาตรการ', sequence:'เรียงลำดับ', risk:'วิเคราะห์หลักฐาน'};
+
+  componentDidMount() {
+    this.socket = io();
+    const urlPin = new URLSearchParams(window.location.search).get('pin');
+    if (urlPin) {
+      const cleanPin = urlPin.replace(/[^0-9]/g, '').slice(0,6);
+      if (cleanPin) this.setState({ pinInput: cleanPin, joinStep: 'name' });
+    }
+    this.socket.on('player:lobbyUpdate', ({ count }) => this.setState({ lobbyCount: count }));
+    this.socket.on('player:gameStarting', () => {
+      if (this._loadTimer) clearInterval(this._loadTimer);
+      this.setState({activeScreen:'loading', loadingSeconds:5});
+      this._loadTimer = setInterval(() => {
+        this.setState(s => ({loadingSeconds: Math.max(0, s.loadingSeconds - 1)}));
+      }, 1000);
+    });
+    this.socket.on('player:round', (payload) => {
+      if (this._loadTimer) clearInterval(this._loadTimer);
+      if (this._roundTimer) clearInterval(this._roundTimer);
+      this.setState({
+        activeScreen: 'alert',
+        roundMission: payload.mission,
+        roundIndex: payload.roundIndex,
+        totalRounds: payload.totalRounds,
+        isLastRoundLive: payload.isLastRound,
+        selectedActionId: null, multiSelected: [], riskLevel: null, riskActionId: null,
+        sequenceOrder: (payload.mission.items || []).map(i => i.id),
+        layerAnswers: {}, deployedLayers: [], completedTasks: [], completedSetupTasks: [],
+        ackedQ1: [], detailLayerId: null, taskWrongId: null, setupWrongId: null,
+        showFinalConfirm: false, showMissionPopup: false, roundResult: null,
+        timeLeft: payload.mission.recTime || 0
+      });
+      if (payload.mission.recTime) {
+        this._roundTimer = setInterval(() => {
+          this.setState(s => ({ timeLeft: Math.max(0, s.timeLeft - 1) }));
+        }, 1000);
+      }
+    });
+    this.socket.on('player:roundResult', (payload) => {
+      if (this._roundTimer) clearInterval(this._roundTimer);
+      this.setState({activeScreen:'outcome', roundResult: payload, leaderboard: payload.leaderboard || [], isGameOver:false});
+    });
+    this.socket.on('player:gameOver', (payload) => {
+      this.setState({leaderboard: payload.leaderboard || [], isGameOver:true, activeScreen:'debrief'});
+    });
+    this.socket.on('player:hostLeft', () => {
+      this.setState({activeScreen:'join', joinStep:'pin', joinError:'โฮสต์ปิดห้องแล้ว กรุณาเข้าร่วมห้องใหม่'});
+    });
+  }
+
+  onPinChange(e){ this.setState({pinInput: e.target.value.replace(/[^0-9]/g, '').slice(0,6), joinError:''}); }
+  onNameChange(e){ this.setState({nameInput: e.target.value}); }
+  goNameStep(){
+    if (!this.state.pinInput.trim()) { this.setState({joinError:'กรุณากรอก Game PIN'}); return; }
+    this.setState({joinStep:'name', joinError:''});
+  }
+  goPinLobby(){
+    const pin = this.state.pinInput.replace(/\s+/g, '').trim();
+    const name = this.state.nameInput.trim();
+    this.socket.emit('player:join', { pin, name }, (res) => {
+      if (!res || !res.ok) { this.setState({joinStep:'pin', joinError:(res && res.error) || 'เข้าร่วมไม่สำเร็จ'}); return; }
+      this.setState({joinStep:'lobby', pin: res.pin, myPlayerName: res.name, joinError:''});
+    });
+  }
+  toggleMissionPopup(){ this.setState(s=>({showMissionPopup: !s.showMissionPopup})); }
+  closeMissionPopup(){ this.setState({showMissionPopup:false}); }
+  goDecision(){ this.setState({activeScreen:'decision'}); }
+  selectSingle(id){ this.setState({selectedActionId:id}); }
+  toggleMulti(id){
+    const required = (this.state.roundMission || {}).requiredCount || 3;
+    this.setState(s=>{
+      const has = s.multiSelected.includes(id);
+      if (has) return {multiSelected: s.multiSelected.filter(x=>x!==id)};
+      if (s.multiSelected.length>=required) return {};
+      return {multiSelected:[...s.multiSelected, id]};
+    });
+  }
+  moveSeq(idx, dir){
+    this.setState(s=>{
+      const arr = [...s.sequenceOrder];
+      const j = idx+dir;
+      if (j<0||j>=arr.length) return {};
+      [arr[idx],arr[j]] = [arr[j],arr[idx]];
+      return {sequenceOrder:arr};
+    });
+  }
+  onSeqDragStart(idx){ this.setState({dragIndex: idx}); }
+  onSeqDrop(idx){
+    this.setState(s=>{
+      if (s.dragIndex===null || s.dragIndex===idx) return {dragIndex:null};
+      const arr = [...s.sequenceOrder];
+      const [moved] = arr.splice(s.dragIndex, 1);
+      arr.splice(idx, 0, moved);
+      return {sequenceOrder:arr, dragIndex:null};
+    });
+  }
+  onSeqDragEnd(){ this.setState({dragIndex:null}); }
+  selectRiskLevel(id){ this.setState({riskLevel:id, riskActionId:null}); }
+  selectRiskAction(id){ this.setState({riskActionId:id}); }
+  openLayerDetail(id){ this.setState({detailLayerId:id, taskWrongId:null, setupWrongId:null}); }
+  closeLayerDetail(){ this.setState({detailLayerId:null, taskWrongId:null, setupWrongId:null}); }
+  ackQ1(id){ this.setState(s=>({ackedQ1: s.ackedQ1.includes(id) ? s.ackedQ1 : [...s.ackedQ1, id]})); }
+  answerTask(layerId, optionId, correct){
+    this.setState(s => {
+      const layerAnswers = { ...s.layerAnswers, [layerId]: { ...(s.layerAnswers[layerId]||{}), qId: optionId } };
+      if (correct) {
+        return { layerAnswers, completedTasks: s.completedTasks.includes(layerId) ? s.completedTasks : [...s.completedTasks, layerId], taskWrongId:null };
+      }
+      return { layerAnswers, taskWrongId: optionId };
+    });
+  }
+  answerSetupTask(layerId, optionId, correct){
+    this.setState(s => {
+      const layerAnswers = { ...s.layerAnswers, [layerId]: { ...(s.layerAnswers[layerId]||{}), setupQId: optionId } };
+      if (correct) {
+        const completedSetupTasks = s.completedSetupTasks.includes(layerId) ? s.completedSetupTasks : [...s.completedSetupTasks, layerId];
+        const deployedLayers = s.deployedLayers.includes(layerId) ? s.deployedLayers : [...s.deployedLayers, layerId];
+        return { layerAnswers, completedSetupTasks, deployedLayers, setupWrongId:null };
+      }
+      return { layerAnswers, setupWrongId: optionId };
+    });
+    if (correct) setTimeout(() => this.setState({detailLayerId:null}), 700);
+  }
+  askConfirm(){ this.setState({showFinalConfirm:true}); }
+  cancelFinalConfirm(){ this.setState({showFinalConfirm:false}); }
+  confirmFinal(){
+    const s = this.state;
+    const mission = s.roundMission;
+    let answer = {};
+    if (mission.interaction === 'single') answer = { optionId: s.selectedActionId };
+    else if (mission.interaction === 'multi') answer = { selectedIds: s.multiSelected };
+    else if (mission.interaction === 'sequence') answer = { order: s.sequenceOrder };
+    else if (mission.interaction === 'risk') answer = { riskId: s.riskLevel, actionId: s.riskActionId };
+    else if (mission.interaction === 'defense') answer = { layers: s.layerAnswers };
+    this.socket.emit('player:submitAnswer', { pin: s.pin, answer }, () => {});
+    this.setState({showFinalConfirm:false, activeScreen:'waiting'});
+  }
+  goDebrief(){ this.setState({activeScreen:'debrief'}); }
+
+  renderVals() {
+    const s = this.state;
+    const mission = s.roundMission || { interaction:'single', name:'', principle:'', riskLabel:'', scenario:'', options:[], items:[], riskLevels:[], riskActions:[], layers:[] };
+    const screenLabels = {join:'Join + Lobby', loading:'Preparing Mission', alert:'Mission Alert', decision:'Security Decision', waiting:'Awaiting Reveal', outcome:'Mission Outcome', debrief:'Security Debrief'};
+    const activeLabel = screenLabels[s.activeScreen] || '';
+
+    const isPinStep = s.joinStep === 'pin';
+    const isNameStep = s.joinStep === 'name';
+    const lobbyStepStyle = (isPinStep || isNameStep) ? 'display:none' : 'display:flex;flex-direction:column;flex:1';
+    const pinForDisplay = s.pin || s.pinInput;
+    const pinDisplay = pinForDisplay ? `${pinForDisplay.slice(0,3)} ${pinForDisplay.slice(3)}` : '';
+
+    const kahootShapes = [
+      { icon: '▲', color: '#e21b3c' },
+      { icon: '◆', color: '#1368ce' },
+      { icon: '●', color: '#d89e00' },
+      { icon: '■', color: '#26890c' }
+    ];
+    const singleActionsView = (mission.options || []).map((a, idx) => {
+      const sel = s.selectedActionId===a.id;
+      const shape = kahootShapes[idx % kahootShapes.length];
+      return {
+        ...a, onClick: () => this.selectSingle(a.id),
+        shapeIcon: shape.icon,
+        shapeStyle: `flex:none;width:34px;height:34px;border-radius:8px;background:${shape.color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px`,
+        cardStyle: `text-align:left;width:100%;padding:14px;border-radius:12px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.04);border-left:4px solid ${shape.color};border-top:1px solid rgba(255,255,255,.09);border-right:1px solid rgba(255,255,255,.09);border-bottom:1px solid rgba(255,255,255,.09);${sel?`box-shadow:0 0 0 2px ${shape.color};`:''}`
+      };
+    });
+
+    const requiredCount = mission.requiredCount || 3;
+    const multiActionsView = (mission.options || []).map(m => {
+      const sel = s.multiSelected.includes(m.id);
+      return {
+        ...m, onClick: () => this.toggleMulti(m.id),
+        cardStyle: `text-align:left;width:100%;padding:12px 14px;border-radius:10px;cursor:pointer;background:rgba(255,255,255,.04);border:${sel?'2px solid #35d0ff':'1px solid rgba(255,255,255,.09)'}`,
+        checkStyle: `width:18px;height:18px;border-radius:5px;flex:none;background:${sel?'#35d0ff':'transparent'};border:2px solid ${sel?'#35d0ff':'rgba(255,255,255,.3)'}`
+      };
+    });
+
+    const itemLabelOf = (id) => ((mission.items || []).find(i => i.id === id) || {}).label || id;
+    const sequenceView = s.sequenceOrder.map((id, idx) => ({
+      pos: idx+1, label: itemLabelOf(id),
+      up: () => this.moveSeq(idx,-1), down: () => this.moveSeq(idx,1),
+      onDragStart: () => this.onSeqDragStart(idx),
+      onDragOver: (e) => e.preventDefault(),
+      onDrop: () => this.onSeqDrop(idx),
+      onDragEnd: () => this.onSeqDragEnd(),
+      rowStyle: `background:${s.dragIndex===idx?'rgba(53,208,255,.12)':'rgba(255,255,255,.04)'};border:1px solid ${s.dragIndex===idx?'#35d0ff':'rgba(255,255,255,.09)'};border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:grab`
+    }));
+
+    const riskLevelsView = (mission.riskLevels || []).map(r => ({
+      label: r.label, onClick: () => this.selectRiskLevel(r.id),
+      style: `padding:10px;border-radius:9px;cursor:pointer;font:600 11.5px 'Chakra Petch';border:1px solid ${s.riskLevel===r.id?'#35d0ff':'rgba(255,255,255,.12)'};background:${s.riskLevel===r.id?'rgba(53,208,255,.15)':'rgba(255,255,255,.04)'};color:#fff`
+    }));
+    const riskActionsView = (mission.riskActions || []).map(ra => ({
+      title: ra.title, onClick: () => this.selectRiskAction(ra.id),
+      cardStyle: `text-align:left;width:100%;padding:12px 14px;border-radius:10px;cursor:pointer;background:rgba(255,255,255,.04);border:${s.riskActionId===ra.id?'2px solid #35d0ff':'1px solid rgba(255,255,255,.09)'}`
+    }));
+
+    const layers = mission.layers || [];
+    const deployedCount = s.deployedLayers.length;
+    const totalLayers = layers.length;
+    const shieldPct = totalLayers ? Math.round((deployedCount / totalLayers) * 100) : 0;
+    const CX = 230, CY = 230, RADIUS = 168;
+    const angleStep = layers.length ? 360 / layers.length : 0;
+    const nodePositions = layers.map((l, idx) => {
+      const angle = (idx * angleStep - 90) * Math.PI / 180;
+      return { x: CX + RADIUS * Math.cos(angle), y: CY + RADIUS * Math.sin(angle) };
+    });
+    const defenseLayersView = layers.map((l, idx) => {
+      const on = s.deployedLayers.includes(l.id);
+      const pos = nodePositions[idx];
+      return {
+        ...l, onClick: () => this.openLayerDetail(l.id),
+        nodeStyle: `position:absolute;left:${pos.x}px;top:${pos.y}px;transform:translate(-50%,-50%);width:104px;padding:10px 8px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;background:${on?'linear-gradient(160deg,rgba(53,208,255,.22),rgba(10,20,32,.92))':'rgba(20,24,34,.85)'};border:1px solid ${on?'#35d0ff':'rgba(255,255,255,.15)'};box-shadow:${on?'0 0 16px rgba(53,208,255,.45)':'0 2px 6px -2px rgba(0,0,0,.5)'};transition:box-shadow .25s,background .25s;z-index:2`,
+        iconStyle: `width:32px;height:32px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:15px;color:${on?'#eafcff':'rgba(255,255,255,.6)'};background:radial-gradient(circle at 30% 28%,${on?'#7fe6ff':'rgba(255,255,255,.35)'},${on?'#0f7fb0':'rgba(255,255,255,.06)'} 60%,${on?'#062a3a':'rgba(0,0,0,.3)'} 100%);box-shadow:inset 0 1px 2px rgba(255,255,255,.5),inset 0 -3px 6px rgba(0,0,0,.4)`,
+        statusLabel: on?'DEPLOYED':'IDLE',
+        statusStyle: `font:700 8px 'Chakra Petch';margin-top:5px;padding:2px 7px;border-radius:5px;background:${on?'rgba(53,208,255,.2)':'rgba(255,255,255,.06)'};color:${on?'#35d0ff':'rgba(255,255,255,.4)'}`
+      };
+    });
+    const defenseLinesView = layers.map((l, idx) => {
+      const on = s.deployedLayers.includes(l.id);
+      const pos = nodePositions[idx];
+      return {
+        x1: CX, y1: CY, x2: pos.x, y2: pos.y,
+        style: `stroke:${on?'#35d0ff':'rgba(255,255,255,.18)'};stroke-width:${on?2.5:1.4};stroke-dasharray:${on?'0':'4 5'};transition:stroke .3s`
+      };
+    });
+    const hubStyle = `position:absolute;left:${CX}px;top:${CY}px;transform:translate(-50%,-50%);width:104px;height:104px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:radial-gradient(circle at 35% 30%,#123a52,#04101a 72%);border:2px solid rgba(53,208,255,.55);box-shadow:0 0 ${16+shieldPct/3}px rgba(53,208,255,.5),inset 0 2px 4px rgba(255,255,255,.15);z-index:2`;
+    const detailLayer = s.detailLayerId ? layers.find(l=>l.id===s.detailLayerId) : null;
+    const hasDetailLayer = !!detailLayer;
+    let detailLayerView = {label:'', icon:'', question:'', optionsView:[], setupOptionsView:[], taskDone:false, setupTaskDone:false, deployed:false, stepQ1:false, stepQ2:false};
+    if (detailLayer) {
+      const taskDone = s.completedTasks.includes(detailLayer.id);
+      const setupTaskDone = s.completedSetupTasks.includes(detailLayer.id);
+      const deployed = s.deployedLayers.includes(detailLayer.id);
+      const optionsView = (detailLayer.options||[]).map(o => {
+        const showGreen = taskDone && o.correct;
+        return {
+          ...o, onClick: () => this.answerTask(detailLayer.id, o.id, o.correct),
+          style: `width:100%;text-align:left;padding:10px 12px;border-radius:8px;cursor:pointer;font:600 12px 'Noto Sans Thai';border:1px solid ${showGreen?'#2ecc71':(s.taskWrongId===o.id?'#ff4d4d':'rgba(255,255,255,.15)')};background:${showGreen?'rgba(46,204,113,.15)':(s.taskWrongId===o.id?'rgba(255,77,77,.12)':'rgba(255,255,255,.05)')};color:#fff`
+        };
+      });
+      const setupOptionsView = (detailLayer.setupOptions||[]).map(o => {
+        const showGreen = setupTaskDone && o.correct;
+        return {
+          ...o, onClick: () => this.answerSetupTask(detailLayer.id, o.id, o.correct),
+          style: `width:100%;text-align:left;padding:10px 12px;border-radius:8px;cursor:pointer;font:600 12px 'Noto Sans Thai';border:1px solid ${showGreen?'#2ecc71':(s.setupWrongId===o.id?'#ff4d4d':'rgba(255,255,255,.15)')};background:${showGreen?'rgba(46,204,113,.15)':(s.setupWrongId===o.id?'rgba(255,77,77,.12)':'rgba(255,255,255,.05)')};color:#fff`
+        };
+      });
+      const ackedQ1 = s.ackedQ1.includes(detailLayer.id);
+      detailLayerView = {
+        ...detailLayer, deployed, taskDone, setupTaskDone, optionsView, setupOptionsView,
+        stepQ1: !ackedQ1 && !deployed, stepQ2: ackedQ1 && !deployed,
+        ackNext: () => this.ackQ1(detailLayer.id)
+      };
+    }
+
+    const isPatternSingle = mission.interaction === 'single';
+    const isPatternMulti = mission.interaction === 'multi';
+    const isPatternSequence = mission.interaction === 'sequence';
+    const isPatternRisk = mission.interaction === 'risk';
+    const isPatternDefense = mission.interaction === 'defense';
+    const canSubmit = isPatternSingle ? !!s.selectedActionId
+      : isPatternMulti ? s.multiSelected.length === requiredCount
+      : isPatternSequence ? true
+      : isPatternRisk ? (!!s.riskLevel && !!s.riskActionId)
+      : isPatternDefense ? true
+      : false;
+    const submitStyle = `width:100%;padding:15px;border:none;border-radius:12px;font:700 14px 'Chakra Petch';letter-spacing:.04em;cursor:${canSubmit?'pointer':'not-allowed'};background:${canSubmit?'#e2231c':'rgba(255,255,255,.08)'};color:${canSubmit?'#fff':'rgba(255,255,255,.35)'}`;
+    const patternHeading = `รูปแบบคำถาม: ${this.interactionLabels[mission.interaction] || ''}`;
+    const timeLeftStyle = `font:700 12px 'Chakra Petch';padding:4px 9px;border-radius:6px;background:${s.timeLeft<=10?'rgba(255,77,77,.18)':'rgba(53,208,255,.12)'};color:${s.timeLeft<=10?'#ff8a80':'#35d0ff'}`;
+
+    const roundLabel = mission.name ? `Mission ${s.roundIndex+1} · ${mission.name}` : '';
+    const riskLabel = mission.riskLabel || '';
+    const roundPrincipleLabel = mission.principle || '';
+
+    const rankColors = {1:'#f5a623', 2:'#8a8fa3', 3:'#c88a4a'};
+    const myId = this.socket ? this.socket.id : null;
+    const leaderboardRowsView = (s.leaderboard || []).map((p) => {
+      const isMe = p.id === myId;
+      return {
+        ...p, name: isMe ? `คุณ (${p.name})` : p.name,
+        rowStyle: `display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;background:${isMe?'rgba(53,208,255,.12)':'rgba(255,255,255,.04)'};border:1px solid ${isMe?'#35d0ff':'rgba(255,255,255,.09)'}`,
+        rankBadgeStyle: `width:26px;height:26px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font:700 12px 'Chakra Petch';color:#fff;background:${rankColors[p.rank]||'#4a5178'}`
+      };
+    });
+    const me = (s.leaderboard || []).find(p => p.id === myId);
+    const myRank = me ? me.rank : '—';
+    const myScore = me ? me.score : 0;
+
+    const roundResult = s.roundResult || { points:0, rawPoints:0, speedFactor:0, choiceText:'', correct:false, recommended:'', explanation:'', yourScore:0 };
+    const outcomeIcon = roundResult.correct ? '✓' : '!';
+    const outcomeIconColor = roundResult.correct ? '#2ecc71' : '#f5a623';
+    const outcomeIconStyle = `width:88px;height:88px;border-radius:50%;border:4px solid ${outcomeIconColor};display:flex;align-items:center;justify-content:center;font:700 36px 'Chakra Petch';color:${outcomeIconColor};animation:ncsa-popin .5s cubic-bezier(.2,1.4,.4,1)`;
+    const outcomeTitle = roundResult.correct ? 'มาตรการที่เหมาะสม' : 'ยังไม่ใช่มาตรการที่ดีที่สุด';
+    const outcomeBarStyle = `height:8px;border-radius:4px;width:${roundResult.points}%;background:linear-gradient(90deg,#35d0ff,#2ecc71)`;
+    const showSpeedBonus = roundResult.rawPoints > 0 && roundResult.points < roundResult.rawPoints;
+    const speedBonusLabel = `ตอบเร็ว ${Math.round((roundResult.speedFactor||0)*100)}% ของคะแนนเต็ม — ได้ ${roundResult.points} จาก ${roundResult.rawPoints} คะแนน`;
+
+    return {
+      activeLabel,
+      isJoin: s.activeScreen==='join', isAlert: s.activeScreen==='alert', isLoading: s.activeScreen==='loading', loadingSeconds: s.loadingSeconds,
+      isDecision: s.activeScreen==='decision', isWaiting: s.activeScreen==='waiting',
+      isOutcome: s.activeScreen==='outcome', isDebrief: s.activeScreen==='debrief',
+      isPinStep, isNameStep, lobbyStepStyle, myPlayerName: s.myPlayerName || s.nameInput,
+      pinInput: s.pinInput, onPinChange: (e) => this.onPinChange(e), joinError: s.joinError,
+      nameInput: s.nameInput, onNameChange: (e) => this.onNameChange(e),
+      goPinLobby: () => this.goPinLobby(), goNameStep: () => this.goNameStep(),
+      pinDisplay, lobbyCount: s.lobbyCount,
+      roundLabel, riskLabel, roundPrincipleLabel, briefingNarrative: mission.scenario,
+      goDecision: () => this.goDecision(), goOutcome: () => {}, goDebrief: () => this.goDebrief(),
+      patternHeading, timeLeft: s.timeLeft, timeLeftStyle, isPatternSingle, isPatternMulti, isPatternSequence, isPatternRisk, isPatternDefense,
+      singleActionsView, multiActionsView, multiCount: s.multiSelected.length, requiredCount, sequenceView,
+      riskLevelsView, hasRiskLevel: !!s.riskLevel, riskActionsView,
+      defenseLayersView, defenseLinesView, hubStyle, shieldPct, deployedCount, totalLayers,
+      hasDetailLayer, detailLayerView, closeLayerDetail: () => this.closeLayerDetail(),
+      stepPrimaryLabel: isPatternDefense ? 'ส่งคำตอบทั้งหมด' : 'ยืนยันคำตอบ', stepPrimaryAction: () => this.askConfirm(),
+      showFinalConfirm: s.showFinalConfirm, cancelFinalConfirm: () => this.cancelFinalConfirm(), confirmFinal: () => this.confirmFinal(),
+      showMissionPopup: s.showMissionPopup, toggleMissionPopup: () => this.toggleMissionPopup(), closeMissionPopup: () => this.closeMissionPopup(),
+      stopPropagation: (e) => e.stopPropagation(),
+      cannotSubmit: !canSubmit, submitStyle,
+      roundResult, outcomeIcon, outcomeIconStyle, outcomeTitle, outcomeBarStyle, showSpeedBonus, speedBonusLabel,
+      myRank, myScore, leaderboardRowsView,
+      isGameOver: s.isGameOver, isWaitingNextRound: !s.isGameOver
+    };
+  }
+}
+
+</script>
+</body>
+</html>

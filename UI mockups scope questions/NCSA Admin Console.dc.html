@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#eef0f5;font-family:'Noto Sans Thai','Chakra Petch',system-ui,sans-serif}
+*{box-sizing:border-box}
+a{color:#e8f4ff}a:hover{color:#e2231c}
+@keyframes ncsa-spin{to{transform:rotate(360deg)}}
+@keyframes ncsa-alert-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,77,77,.5)}50%{box-shadow:0 0 0 14px rgba(255,77,77,0)}}
+@keyframes ncsa-alert-fadein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ncsa-podium-rise{from{transform:translateY(60px) scale(.85);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+@keyframes ncsa-crown-bounce{0%{transform:translateY(-16px) scale(.5) rotate(-10deg);opacity:0}60%{transform:translateY(4px) scale(1.15) rotate(4deg);opacity:1}100%{transform:translateY(0) scale(1) rotate(0deg);opacity:1}}
+@keyframes ncsa-confetti-fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(420px) rotate(540deg);opacity:0}}
+@keyframes ncsa-glow-pulse{0%,100%{box-shadow:0 0 20px 0 rgba(245,166,35,.4)}50%{box-shadow:0 0 40px 8px rgba(245,166,35,.7)}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:transparent">
+  <div style="position:sticky;top:0;z-index:50;background:linear-gradient(90deg,#05070f,#0d1a33);padding:14px 28px;display:flex;align-items:center;gap:18px;overflow-x:auto;border-bottom:1px solid rgba(53,208,255,.25);box-shadow:0 0 20px -4px rgba(53,208,255,.3)">
+    <div style="display:flex;align-items:center;gap:8px;flex:none">
+      <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#1c2f7a,#e2231c);display:flex;align-items:center;justify-content:center;font:700 12px 'Chakra Petch';color:#fff">N</div>
+      <div style="font:700 14px 'Chakra Petch';color:#fff;white-space:nowrap">NCSA · Admin Console (Website)</div>
+    </div>
+    <div style="display:flex;gap:6px;flex:none">
+      <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="6">
+        <button onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="padding:36px 28px 80px;display:flex;flex-direction:column;align-items:center;gap:16px">
+
+    <!-- HOME -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <div style="width:100%;max-width:900px;border-radius:24px;overflow:hidden;background:linear-gradient(160deg,#0a0e1a,#12205c 55%,#1c2f7a);box-shadow:0 30px 80px -30px rgba(0,0,0,.5);color:#fff">
+        <div style="padding:90px 40px 100px;text-align:center">
+          <div style="font:700 12px 'Chakra Petch';letter-spacing:.16em;opacity:.6">NCSA PRESENTS</div>
+          <div style="font:700 46px 'Chakra Petch';margin-top:16px;letter-spacing:.02em">ZERO TRUST<br/>CYBER MISSION</div>
+          <div style="font:500 14px 'Noto Sans Thai';opacity:.65;margin-top:16px;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.7">เกมจำลองสถานการณ์ด้านความมั่นคงปลอดภัยไซเบอร์ วิเคราะห์เหตุการณ์จริงและสั่งใช้มาตรการ Zero Trust ให้ทันเวลา</div>
+          <div style="display:flex;gap:14px;justify-content:center;margin-top:44px;flex-wrap:wrap">
+            <button onClick="{{ goHowToPlay }}" style="padding:16px 28px;border:1px solid rgba(255,255,255,.3);border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font:700 14px 'Chakra Petch';letter-spacing:.04em;cursor:pointer">วิธีการเล่น</button>
+            <button onClick="{{ goPlay }}" style="padding:16px 32px;border:none;border-radius:12px;background:#e2231c;color:#fff;font:700 14px 'Chakra Petch';letter-spacing:.04em;cursor:pointer">เล่นเกม →</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- HOW TO PLAY -->
+    <sc-if value="{{ isHowToPlay }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:900px;border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
+        <div style="padding:32px 40px 24px;border-bottom:1px solid #eceef4">
+          <div style="font:700 22px 'Chakra Petch';color:#e8f4ff">How to Play</div>
+          <div style="font:500 12.5px 'Noto Sans Thai';color:#8fa3c4;margin-top:6px">ภาพรวมขั้นตอนของแต่ละ Mission ที่ผู้เล่นจะพบตลอดเกม</div>
+        </div>
+        <div style="padding:32px 40px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <sc-for list="{{ howToSteps }}" as="st" hint-placeholder-count="6">
+              <div style="display:flex;gap:14px;align-items:flex-start">
+                <div style="width:30px;height:30px;border-radius:8px;background:rgba(53,208,255,.12);color:#e8f4ff;display:flex;align-items:center;justify-content:center;font:700 13px 'Chakra Petch';flex:none">{{ st.n }}</div>
+                <div>
+                  <div style="font:700 13px 'Chakra Petch';color:#e8f4ff">{{ st.title }}</div>
+                  <div style="font:500 12.5px 'Noto Sans Thai';color:#8fa3c4;margin-top:2px;line-height:1.5">{{ st.desc }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:32px">
+            <button onClick="{{ goHome }}" style="flex:1;padding:15px;border:1px solid rgba(53,208,255,.3);border-radius:12px;background:rgba(255,255,255,.05);color:#e8f4ff;font:700 13.5px 'Chakra Petch';cursor:pointer">← กลับหน้าแรก</button>
+            <button onClick="{{ goPlay }}" style="flex:2;padding:15px;border:none;border-radius:12px;background:#e2231c;color:#fff;font:700 14px 'Chakra Petch';letter-spacing:.04em;cursor:pointer">เล่นเกม →</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- MISSION SELECT -->
+    <sc-if value="{{ isMissionSelect }}" hint-placeholder-val="{{ true }}">
+      <div style="width:100%;max-width:1280px;border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
+        <div style="padding:22px 28px;border-bottom:1px solid #eceef4;display:flex;justify-content:space-between;align-items:center">
+          <div style="font:700 19px 'Chakra Petch';color:#e8f4ff">เลือก Mission (เลือกได้มากกว่า 1)</div>
+          <div style="font:600 12px 'Chakra Petch';color:#7a91b3">20 Missions ทั้งหมด · เลือกแล้ว {{ selectedCount }} รายการ</div>
+        </div>
+        <div style="padding:18px 28px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid #eceef4">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ catFilters }}" as="c" hint-placeholder-count="6">
+              <button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ interFilters }}" as="i" hint-placeholder-count="4">
+              <button onClick="{{ i.onClick }}" style="{{ i.style }}">{{ i.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="padding:22px 28px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+          <sc-for list="{{ missionsView }}" as="m" hint-placeholder-count="20">
+            <div style="{{ m.cardStyle }}">
+              <div style="height:88px;background:{{ m.thumbBg }};display:flex;align-items:center;justify-content:center;font:700 12px 'Chakra Petch';color:rgba(255,255,255,.85);letter-spacing:.05em">{{ m.category }}</div>
+              <div style="padding:14px;display:flex;flex-direction:column;gap:8px;flex:1">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                  <div style="font:700 14px 'Chakra Petch';color:#e8f4ff">{{ m.name }}</div>
+                  <input type="checkbox" checked="{{ m.checked }}" onChange="{{ m.onCheck }}" style="width:16px;height:16px;margin-top:2px"></input>
+                </div>
+                <div style="font:500 11.5px 'Noto Sans Thai';color:#8fa3c4;line-height:1.5">{{ m.scenario }}</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <div style="font:600 9.5px 'Chakra Petch';padding:3px 7px;border-radius:5px;background:rgba(53,208,255,.12);color:#a9c2e0">{{ m.interaction }}</div>
+                  <div style="font:600 9.5px 'Chakra Petch';padding:3px 7px;border-radius:5px;background:rgba(255,77,77,.15);color:#ff8a80">{{ m.principle }}</div>
+                </div>
+                <div style="font:600 11px 'Chakra Petch';color:#7a91b3">{{ m.difficultyDots }} · แนะนำ {{ m.recTime }}s · {{ m.actionCount }} Actions</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:22px 28px;border-top:1px solid #eceef4;display:flex;flex-direction:column;gap:12px">
+          <div style="font:700 13px 'Chakra Petch';color:#e8f4ff">ตั้งค่าเวลาต่อ Scenario</div>
+          <label style="display:flex;align-items:center;gap:8px;font:600 12px 'Chakra Petch';color:#a9c2e0">
+            <input type="checkbox" checked="{{ useRecommended }}" onChange="{{ toggleRecommended }}"></input>
+            ใช้เวลาที่ระบบแนะนำต่อประเภท Scenario
+          </label>
+          <sc-if value="{{ showCustomTime }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:14px">
+              <input type="range" min="5" max="300" value="{{ customTime }}" onChange="{{ onTimeChange }}" style="flex:1"></input>
+              <div style="font:700 13px 'Chakra Petch';color:#e8f4ff;width:70px">{{ customTime }} วินาที</div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="padding:20px 28px 0;border-top:1px solid #eceef4;padding-top:20px">
+          <div style="border:1px solid rgba(53,208,255,.15);border-radius:14px;padding:18px 20px;background:rgba(255,255,255,.05);display:flex;flex-direction:column;gap:12px">
+            <div style="font:700 13px 'Chakra Petch';color:#e8f4ff">Final Attack — ระดับความยาก (ต่อท้ายทุกครั้งหลังจบ Mission ที่เลือก)</div>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ difficultyChips }}" as="dc" hint-placeholder-count="3">
+                <button onClick="{{ dc.onClick }}" style="{{ dc.style }}">{{ dc.label }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ missionSequenceLabel }}" hint-placeholder-val="{{ false }}">
+              <div style="font:600 11.5px 'Chakra Petch';color:#a9c2e0;background:#fff;border:1px solid rgba(53,208,255,.15);border-radius:8px;padding:10px 12px;line-height:1.6">{{ missionSequenceLabel }}</div>
+            </sc-if>
+          </div>
+        </div>
+        <div style="padding:20px 28px 28px">
+          <button onClick="{{ goJoiningRoom }}" disabled="{{ noMissionSelected }}" style="{{ missionNextStyle }}">ถัดไป: เข้าห้อง Joining Room →</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- JOINING ROOM (HOST) -->
+    <sc-if value="{{ isJoiningRoom }}" hint-placeholder-val="{{ true }}">
+      <div style="width:100%;max-width:900px;border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
+        <div style="padding:32px 40px;text-align:center;background:linear-gradient(180deg,#12205c,#1c2f7a);color:#fff">
+          <div style="font:600 12px 'Chakra Petch';letter-spacing:.1em;opacity:.7">GAME PIN</div>
+          <div style="font:700 46px 'Chakra Petch';letter-spacing:.06em;margin-top:6px">{{ pinDisplay }}</div>
+          <div style="width:136px;height:136px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:16px auto 0;padding:8px">
+            <img src="{{ qrDataUrl }}" style="width:100%;height:100%;image-rendering:pixelated"></img>
+          </div>
+          <div style="font:500 12px 'Noto Sans Thai';opacity:.6;margin-top:10px">ผู้เล่นสแกน QR หรือกรอก Game PIN ที่เว็บไซต์เพื่อเข้าร่วม</div>
+          <div style="font:600 11px 'Chakra Petch';opacity:.5;margin-top:4px;word-break:break-all">{{ joinUrl }}</div>
+        </div>
+        <div style="padding:24px 40px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+            <div style="font:700 14px 'Chakra Petch';color:#e8f4ff">ห้องรอผู้เล่น</div>
+            <div style="font:600 12px 'Chakra Petch';color:#7a91b3">{{ joinedCount }} คนเข้าร่วม · {{ selectedCount }} Mission</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+            <sc-for list="{{ joinedPlayersView }}" as="p" hint-placeholder-count="0">
+              <div style="background:rgba(255,255,255,.05);border:1px solid rgba(53,208,255,.15);border-radius:10px;padding:10px 12px">
+                <div style="font:600 12px 'Chakra Petch';color:#e8f4ff">{{ p.name }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <button onClick="{{ startLoading }}" style="width:100%;margin-top:24px;padding:16px;border:none;border-radius:12px;background:#e2231c;color:#fff;font:700 15px 'Chakra Petch';letter-spacing:.04em;cursor:pointer">เริ่มเกม</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- LOADING -->
+    <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:500px;border-radius:18px;background:#0a0e1a;color:#fff;padding:60px 40px;text-align:center">
+        <div style="width:64px;height:64px;border-radius:50%;border:4px solid rgba(255,255,255,.15);border-top-color:#35d0ff;margin:0 auto;animation:ncsa-spin 1s linear infinite"></div>
+        <div style="font:700 18px 'Chakra Petch';margin-top:24px">กำลังเตรียมภารกิจ...</div>
+        <div style="font:600 13px 'Chakra Petch';color:#35d0ff;margin-top:8px">{{ loadingSeconds }}s</div>
+      </div>
+    </sc-if>
+
+    <!-- QUESTION SCENARIO (regular round) -->
+    <sc-if value="{{ isQuestionRound }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:700px;border-radius:18px;background:#0a0e1a;color:#fff;overflow:hidden;box-shadow:0 20px 60px -30px rgba(0,0,0,.6)">
+        <div style="padding:16px 32px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">
+          <div style="font:600 11px 'Chakra Petch';letter-spacing:.06em;color:rgba(255,255,255,.5)">{{ roundProgressLabel }}</div>
+          <div style="font:700 11px 'Chakra Petch';color:#ff4d4d">{{ currentMission.riskLabel }}</div>
+        </div>
+        <div style="padding:36px 32px 24px;display:flex;flex-direction:column;gap:8px;align-items:center;background:radial-gradient(circle at 50% 0%,rgba(255,77,77,.18),transparent 70%)">
+          <div style="width:72px;height:72px;border-radius:50%;border:3px solid #ff4d4d;display:flex;align-items:center;justify-content:center;font:700 30px 'Chakra Petch';color:#ff4d4d;animation:ncsa-alert-pulse 1.6s ease-in-out infinite">!</div>
+          <div style="font:700 20px 'Chakra Petch';text-align:center;margin-top:8px;animation:ncsa-alert-fadein .6s ease-out">MISSION ALERT</div>
+          <div style="font:700 15px 'Chakra Petch';text-align:center;margin-top:4px">{{ currentMission.name }}</div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+            <div style="font:600 10px 'Chakra Petch';padding:4px 10px;border-radius:6px;background:rgba(53,208,255,.15);color:#35d0ff">{{ currentMission.interaction }}</div>
+            <div style="font:600 10px 'Chakra Petch';padding:4px 10px;border-radius:6px;background:rgba(226,35,28,.15);color:#ff8a80">{{ currentMission.principle }}</div>
+          </div>
+        </div>
+        <div style="padding:24px 32px;display:flex;flex-direction:column;gap:10px">
+          <div style="font:700 12px 'Chakra Petch';letter-spacing:.06em;color:rgba(255,255,255,.55)">SITUATION BRIEFING</div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px">
+            <div style="font:500 13px 'Noto Sans Thai';color:rgba(255,255,255,.85);line-height:1.7">{{ currentMission.scenario }}</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+            <button onClick="{{ toggleEvidenceHint }}" style="padding:7px 12px;border:1px solid rgba(53,208,255,.4);border-radius:8px;background:rgba(53,208,255,.08);color:#35d0ff;font:700 11px 'Chakra Petch';cursor:pointer">{{ evidenceHintLabel }}</button>
+            <div style="{{ timeLeftStyle }}">{{ timeLeft }}s เหลือ — เปิดเผยคำตอบอัตโนมัติเมื่อหมดเวลา</div>
+          </div>
+          <sc-if value="{{ showEvidenceHint }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+              <sc-for list="{{ currentMission.evidenceItems }}" as="e" hint-placeholder-count="8">
+                <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:10px">
+                  <div style="width:22px;height:22px;border-radius:6px;background:rgba(53,208,255,.15);color:#35d0ff;display:flex;align-items:center;justify-content:center;font:700 10px 'Chakra Petch';margin-bottom:6px">{{ e.k }}</div>
+                  <div style="font:600 9px 'Chakra Petch';letter-spacing:.04em;color:rgba(255,255,255,.5)">{{ e.label }}</div>
+                  <div style="font:600 11.5px 'Noto Sans Thai';margin-top:2px;line-height:1.4">{{ e.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <div style="padding:0 32px 8px;text-align:center">
+          <div style="font:600 11px 'Chakra Petch';color:#7a91b3">ตอบแล้ว {{ submittedCount }} / {{ livePlayerCount }} คน</div>
+        </div>
+        <div style="padding:8px 32px 32px">
+          <button onClick="{{ showAnswer }}" style="width:100%;padding:16px;border:none;border-radius:12px;background:#e2231c;color:#fff;font:700 15px 'Chakra Petch';letter-spacing:.04em;cursor:pointer">ผู้เล่นตอบครบ / หมดเวลา — ดูคำตอบ →</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ANSWER REVEAL -->
+    <sc-if value="{{ isAnswerReveal }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:900px;border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
+        <div style="padding:20px 32px;border-bottom:1px solid #eceef4">
+          <div style="font:600 11px 'Chakra Petch';letter-spacing:.06em;color:#7a91b3">{{ roundProgressLabel }}</div>
+          <div style="font:700 19px 'Chakra Petch';color:#e8f4ff;margin-top:4px">คำตอบและคำอธิบาย</div>
+        </div>
+        <div style="padding:28px 32px;display:flex;flex-direction:column;gap:16px">
+          <div style="background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:12px;padding:18px">
+            <div style="font:700 10px 'Chakra Petch';letter-spacing:.05em;color:#2ecc71">มาตรการที่แนะนำ (Recommended)</div>
+            <div style="font:700 15px 'Chakra Petch';color:#e8f4ff;margin-top:6px">{{ currentMission.recommendedAction }}</div>
+          </div>
+          <div style="background:rgba(255,255,255,.05);border:1px solid rgba(53,208,255,.15);border-radius:12px;padding:18px">
+            <div style="font:700 10px 'Chakra Petch';letter-spacing:.05em;color:#a9c2e0">คำอธิบายเชิง Zero Trust</div>
+            <div style="font:500 13px 'Noto Sans Thai';color:#a9c2e0;margin-top:6px;line-height:1.8">{{ currentMission.explanation }}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font:700 12px 'Chakra Petch';color:#e8f4ff;margin-bottom:2px">มาตรการที่ผู้เล่นเลือก</div>
+            <sc-for list="{{ actionBars }}" as="b" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="display:flex;justify-content:space-between;font:600 11.5px 'Chakra Petch';color:#a9c2e0"><span>{{ b.label }}</span><span>{{ b.pct }}%</span></div>
+                <div style="height:8px;border-radius:4px;background:rgba(53,208,255,.12)">
+                  <div style="height:8px;border-radius:4px;width:{{ b.pct }}%;background:{{ b.color }}"></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="padding:0 32px 28px">
+          <button onClick="{{ goLeaderboardFromAnswer }}" style="width:100%;padding:15px;border:none;border-radius:12px;background:#12205c;color:#fff;font:700 14px 'Chakra Petch';letter-spacing:.04em;cursor:pointer">ไปที่ Leaderboard →</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- LIVE CONTROL / LEADERBOARD -->
+    <sc-if value="{{ isLiveControl }}" hint-placeholder-val="{{ true }}">
+      <div style="width:100%;max-width:1280px;border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
+        <div style="padding:22px 28px;border-bottom:1px solid #eceef4;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font:700 19px 'Chakra Petch';color:#e8f4ff">{{ leaderboardTitle }}</div>
+            <div style="font:600 12px 'Chakra Petch';color:#7a91b3;margin-top:4px">{{ roundProgressLabel }} · {{ livePlayerCount }} Players</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px">
+            <label style="display:flex;align-items:center;gap:8px;font:600 12px 'Chakra Petch';color:#a9c2e0">
+              <input type="checkbox" checked="{{ revealRecommended }}" onChange="{{ toggleReveal }}"></input>
+              เปิดเผย Recommended Action ให้ผู้เล่นเห็น
+            </label>
+            <button onClick="{{ goWinning }}" style="padding:10px 16px;border:none;border-radius:8px;background:#e2231c;color:#fff;font:700 12px 'Chakra Petch';cursor:pointer">{{ nextRoundLabel }}</button>
+          </div>
+        </div>
+        <div style="padding:24px 28px;display:grid;grid-template-columns:1.3fr 1fr;gap:24px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font:700 13px 'Chakra Petch';color:#e8f4ff;margin-bottom:4px">อันดับคะแนน</div>
+            <sc-for list="{{ leaderboardView }}" as="lb" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(53,208,255,.15)">
+                <div style="{{ lb.rankStyle }}">{{ lb.rank }}</div>
+                <div style="flex:1">
+                  <div style="font:700 13.5px 'Chakra Petch';color:#e8f4ff">{{ lb.name }}</div>
+                  <div style="font:600 10.5px 'Chakra Petch';color:#7a91b3">Zero Trust Shield {{ lb.shield }}%</div>
+                </div>
+                <div style="font:700 18px 'Chakra Petch';color:#e8f4ff">{{ lb.score }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="font:700 13px 'Chakra Petch';color:#e8f4ff">มาตรการที่ผู้เล่นเลือก</div>
+            <sc-for list="{{ actionBars }}" as="b" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;justify-content:space-between;font:600 11.5px 'Chakra Petch';color:#a9c2e0"><span>{{ b.label }}</span><span>{{ b.pct }}%</span></div>
+                <div style="height:9px;border-radius:5px;background:rgba(53,208,255,.12)">
+                  <div style="height:9px;border-radius:5px;width:{{ b.pct }}%;background:{{ b.color }}"></div>
+                </div>
+              </div>
+            </sc-for>
+            <div style="display:flex;gap:10px;margin-top:6px">
+              <div style="flex:1;background:rgba(255,255,255,.05);border-radius:10px;padding:12px;text-align:center">
+                <div style="font:600 9.5px 'Chakra Petch';color:#7a91b3">SAFE</div>
+                <div style="font:700 18px 'Chakra Petch';color:#2ecc71;margin-top:2px">{{ correctPct }}%</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,.05);border-radius:10px;padding:12px;text-align:center">
+                <div style="font:600 9.5px 'Chakra Petch';color:#7a91b3">RISKY</div>
+                <div style="font:700 18px 'Chakra Petch';color:#e2231c;margin-top:2px">{{ riskyPct }}%</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,.05);border-radius:10px;padding:12px;text-align:center">
+                <div style="font:600 9.5px 'Chakra Petch';color:#7a91b3">ANSWERED</div>
+                <div style="font:700 18px 'Chakra Petch';color:#e8f4ff;margin-top:2px">{{ answeredLabel }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- WINNING -->
+    <sc-if value="{{ isWinning }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:760px;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#0a0e2e,#1c2f7a);color:#fff;box-shadow:0 20px 60px -30px rgba(0,0,0,.5);position:relative">
+        <div style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;pointer-events:none;z-index:0">
+          <sc-for list="{{ confettiView }}" as="c" hint-placeholder-count="24">
+            <div style="{{ c.style }}"></div>
+          </sc-for>
+        </div>
+        <div style="position:relative;z-index:1;padding:36px 32px 0;text-align:center">
+          <div style="font:700 11px 'Chakra Petch';letter-spacing:.12em;opacity:.7">GAME OVER</div>
+          <div style="font:700 24px 'Chakra Petch';margin-top:8px">{{ winningTitle }}</div>
+        </div>
+        <div style="position:relative;z-index:1;display:flex;align-items:flex-end;justify-content:center;gap:14px;padding:28px 24px 0">
+          <sc-for list="{{ podiumView }}" as="p" hint-placeholder-count="3">
+            <div style="{{ p.colStyle }}">
+              <sc-if value="{{ p.isFirst }}" hint-placeholder-val="{{ false }}">
+                <div style="{{ p.crownStyle }}">👑</div>
+              </sc-if>
+              <div style="{{ p.avatarStyle }}">{{ p.initial }}</div>
+              <div style="{{ p.nameStyle }}">{{ p.name }}</div>
+              <div style="{{ p.scoreStyle }}">{{ p.score }}</div>
+              <div style="{{ p.baseStyle }}">{{ p.rank }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:relative;z-index:1;background:rgba(0,0,0,.15);padding:24px 32px 32px;margin-top:22px">
+          <sc-if value="{{ hasOthers }}" hint-placeholder-val="{{ false }}">
+            <div style="font:700 12px 'Chakra Petch';opacity:.7;margin-bottom:12px;letter-spacing:.05em">ผู้เล่นคนอื่น</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ othersView }}" as="r" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.06);border-radius:10px;padding:10px 14px">
+                  <div style="font:700 13px 'Chakra Petch';opacity:.6;width:20px">#{{ r.rank }}</div>
+                  <div style="flex:1;font:600 13px 'Chakra Petch'">{{ r.name }}</div>
+                  <div style="font:700 14px 'Chakra Petch';color:#2ecc71">{{ r.score }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <div style="position:relative;z-index:1;padding:0 32px 32px">
+          <button onClick="{{ goPlay }}" style="width:100%;padding:15px;border:none;border-radius:12px;background:#e2231c;color:#fff;font:700 14px 'Chakra Petch';letter-spacing:.04em;cursor:pointer">Play Again →</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- FINAL ZERO TRUST ATTACK (final round question) -->
+    <sc-if value="{{ isFinalAttack }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;max-width:1280px;border-radius:18px;background:#0a0e1a;border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 60px -30px rgba(0,0,0,.6);overflow:hidden;color:#fff">
+        <div style="padding:22px 28px;border-bottom:1px solid rgba(255,255,255,.08)">
+          <div style="font:700 19px 'Chakra Petch'">Final Zero Trust Attack — Defense Layer Builder</div>
+          <div style="font:500 12px 'Noto Sans Thai';color:rgba(255,255,255,.5);margin-top:4px">เลือกมาตรการที่ปลดล็อกมาวางใน Defense Layer ก่อนการโจมตีเริ่มขึ้น</div>
+        </div>
+        <div style="padding:28px 28px;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+            <div style="font:700 12px 'Chakra Petch';color:#35d0ff;align-self:flex-start">มาตรการที่ปลดล็อก (Defense Framework Map)</div>
+            <div style="position:relative;width:460px;height:460px;background:radial-gradient(circle at 50% 50%,rgba(53,208,255,.07),transparent 70%)">
+              <svg width="460" height="460" viewBox="0 0 460 460" style="position:absolute;top:0;left:0">
+                <sc-for list="{{ defenseLinesView }}" as="ln" hint-placeholder-count="7">
+                  <line x1="{{ ln.x1 }}" y1="{{ ln.y1 }}" x2="{{ ln.x2 }}" y2="{{ ln.y2 }}" style="{{ ln.style }}"></line>
+                </sc-for>
+              </svg>
+              <div style="{{ hubStyle }}">
+                <div style="font:700 9px 'Chakra Petch';color:rgba(255,255,255,.6);letter-spacing:.05em">SHIELD</div>
+                <div style="font:700 22px 'Chakra Petch';color:#35d0ff">{{ shieldPct }}%</div>
+              </div>
+              <sc-for list="{{ defenseLayersView }}" as="l" hint-placeholder-count="7">
+                <button onClick="{{ l.onClick }}" style="{{ l.nodeStyle }}">
+                  <div style="{{ l.iconStyle }}">{{ l.icon }}</div>
+                  <div style="font:600 9.5px 'Chakra Petch';color:#fff;text-align:center;margin-top:6px;line-height:1.25">{{ l.label }}</div>
+                  <div style="{{ l.statusStyle }}">{{ l.statusLabel }}</div>
+                </button>
+                <div style="{{ l.menuStyle }}">
+                  <button onClick="{{ l.toggleSelect }}" style="width:100%;padding:8px 10px;border:none;border-radius:7px;background:rgba(53,208,255,.15);color:#35d0ff;font:700 11px 'Chakra Petch';cursor:pointer;text-align:left">{{ l.selectLabel }}</button>
+                  <button onClick="{{ l.openDetail }}" style="width:100%;padding:8px 10px;border:none;border-radius:7px;background:rgba(255,255,255,.08);color:#fff;font:700 11px 'Chakra Petch';cursor:pointer;text-align:left">รายละเอียด</button>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0">
+            <div style="font:700 12px 'Chakra Petch';color:#ff8a3d;margin-bottom:14px">Attack Simulation Timeline</div>
+            <sc-for list="{{ attackTimelineView }}" as="step" hint-placeholder-count="8">
+              <div style="{{ step.rowStyle }}">
+                <div style="{{ step.orbStyle }}">{{ step.step }}</div>
+                <div style="flex:1;font:500 12px 'Noto Sans Thai'">{{ step.text }}</div>
+                <div style="{{ step.statusStyle }}">{{ step.statusLabel }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="padding:0 28px 8px;text-align:center">
+          <div style="font:600 11px 'Chakra Petch';color:#7a91b3">ผู้เล่นวางมาตรการแล้ว {{ submittedCount }} / {{ livePlayerCount }} คน · เหลือเวลา {{ timeLeft }}s</div>
+        </div>
+        <div style="padding:8px 28px 28px">
+          <button onClick="{{ showAnswer }}" style="width:100%;padding:16px;border:none;border-radius:12px;background:#e2231c;color:#fff;font:700 15px 'Chakra Petch';letter-spacing:.04em;cursor:pointer">ผู้เล่นวางมาตรการครบ / หมดเวลา — ดูสรุปผล →</button>
+        </div>
+      </div>
+
+      <sc-if value="{{ hasDetailLayer }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ closeLayerDetail }}" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50">
+          <div onClick="{{ stopPropagation }}" style="width:420px;max-width:90vw;background:#12151f;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:28px;color:#fff;box-shadow:0 30px 60px -20px rgba(0,0,0,.6)">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:44px;height:44px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:18px;background:radial-gradient(circle at 30% 28%,#7fe6ff,#0f7fb0 60%,#062a3a 100%);box-shadow:inset 0 1px 2px rgba(255,255,255,.5),inset 0 -3px 6px rgba(0,0,0,.4)">{{ detailLayerView.icon }}</div>
+              <div style="font:700 16px 'Chakra Petch'">{{ detailLayerView.label }}</div>
+            </div>
+            <sc-if value="{{ detailLayerView.showConfirm }}" hint-placeholder-val="{{ false }}">
+              <div style="font:500 13px 'Noto Sans Thai';color:rgba(255,255,255,.8);margin-top:16px;line-height:1.8">{{ detailLayerView.detail }}</div>
+            </sc-if>
+
+            <sc-if value="{{ detailLayerView.stepQ1 }}" hint-placeholder-val="{{ true }}">
+              <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+                <div style="font:700 12px 'Chakra Petch';color:#35d0ff">โจทย์ที่ 1 / 2 — แนวคิด</div>
+                <div style="font:600 12.5px 'Noto Sans Thai';color:rgba(255,255,255,.85)">{{ detailLayerView.question }}</div>
+                <sc-for list="{{ detailLayerView.optionsView }}" as="opt" hint-placeholder-count="4">
+                  <button onClick="{{ opt.onClick }}" style="{{ opt.style }}">{{ opt.label }}</button>
+                </sc-for>
+                <sc-if value="{{ detailLayerView.taskDone }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:4px;padding:10px 12px;border-radius:8px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);font:500 12px 'Noto Sans Thai';color:#c8ffe1;line-height:1.6">{{ detailLayerView.reason }}</div>
+                  <button onClick="{{ detailLayerView.ackNext }}" style="margin-top:4px;padding:10px 12px;border:none;border-radius:8px;background:#2ecc71;color:#062a1a;font:700 12px 'Chakra Petch';cursor:pointer">ถัดไป: โจทย์ที่ 2 →</button>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ detailLayerView.stepQ2 }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+                <div style="font:700 12px 'Chakra Petch';color:#ff8a3d">โจทย์ที่ 2 / 2 — การตั้งค่า</div>
+                <div style="font:600 12.5px 'Noto Sans Thai';color:rgba(255,255,255,.85)">{{ detailLayerView.setupQuestion }}</div>
+                <sc-for list="{{ detailLayerView.setupOptionsView }}" as="opt" hint-placeholder-count="4">
+                  <button onClick="{{ opt.onClick }}" style="{{ opt.style }}">{{ opt.label }}</button>
+                </sc-for>
+                <sc-if value="{{ detailLayerView.setupTaskDone }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:4px;padding:10px 12px;border-radius:8px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);font:500 12px 'Noto Sans Thai';color:#c8ffe1;line-height:1.6">{{ detailLayerView.setupReason }}</div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ detailLayerView.showConfirm }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:18px;padding:12px;border-radius:10px;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);font:700 12px 'Chakra Petch';color:#2ecc71">✓ ผ่านทั้ง 2 โจทย์แล้ว — พร้อมนำมาตรการนี้ไปใช้</div>
+            </sc-if>
+
+            <div style="display:flex;gap:10px;margin-top:24px">
+              <button onClick="{{ closeLayerDetail }}" style="flex:1;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:transparent;color:#fff;font:700 12.5px 'Chakra Petch';cursor:pointer">ปิด</button>
+              <sc-if value="{{ detailLayerView.showConfirm }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ detailLayerView.onConfirm }}" style="flex:1;padding:12px;border:none;border-radius:10px;background:#e2231c;color:#fff;font:700 12.5px 'Chakra Petch';cursor:pointer">{{ detailLayerView.confirmLabel }}</button>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    activeScreen: 'home',
+    catFilter: 'all',
+    interFilter: 'all',
+    selectedMissions: [],
+    useRecommended: true,
+    customTime: 45,
+    finalAttackDifficulty: 'medium',
+    loadingSeconds: 5,
+    revealRecommended: false,
+    showEvidenceHint: false,
+    deployedLayers: [],
+    openLayerMenuId: null,
+    detailLayerId: null,
+    completedTasks: [],
+    completedSetupTasks: [],
+    ackedQ1: [],
+    taskWrongId: null,
+    setupWrongId: null,
+    pin: null,
+    joinUrl: '',
+    qrDataUrl: '',
+    livePlayers: [],
+    roundMission: null,
+    roundIndex: -1,
+    totalRoundsLive: 0,
+    isLastRoundLive: false,
+    submittedCount: 0,
+    revealData: null,
+    leaderboardLive: [],
+    finalLeaderboard: null,
+    timeLeft: 0
+  };
+
+  componentDidMount() {
+    this.socket = io();
+    this.socket.on('host:playersUpdate', ({ players }) => this.setState({ livePlayers: players }));
+    this.socket.on('host:answersUpdate', ({ submittedCount }) => this.setState({ submittedCount }));
+    this.socket.on('host:roundRevealed', (summary) => {
+      if (this._roundTimer) clearInterval(this._roundTimer);
+      this.setState((s) => (
+        s.activeScreen === 'answerReveal' || s.activeScreen === 'liveControl'
+          ? { revealData: summary, leaderboardLive: summary.leaderboard || [] }
+          : { activeScreen: 'answerReveal', revealData: summary, leaderboardLive: summary.leaderboard || [] }
+      ));
+    });
+  }
+
+  difficultyLevels = [
+    {id:'easy', label:'ง่าย'}, {id:'medium', label:'กลาง'}, {id:'hard', label:'ยาก'}
+  ];
+
+  screensData = [
+    {id:'home', label:'Home'},
+    {id:'missionSelect', label:'Mission Select'}
+  ];
+
+  howToSteps = [
+    {n:1, title:'Mission Alert', desc:'ระบบแจ้งเตือนเหตุการณ์ด้านความมั่นคงปลอดภัยไซเบอร์ที่ตรวจพบ'},
+    {n:2, title:'Situation Briefing', desc:'สรุปสถานการณ์แบบกระชับ: เกิดอะไรขึ้น กับใคร เมื่อไหร่ และผลกระทบ'},
+    {n:3, title:'Evidence Panel', desc:'ตรวจสอบหลักฐาน เช่น อุปกรณ์ ตำแหน่ง สถานะ MFA ก่อนตัดสินใจ'},
+    {n:4, title:'Security Decision', desc:'เลือก Security Action ที่เหมาะสมที่สุดเพื่อรับมือสถานการณ์'},
+    {n:5, title:'Mission Outcome', desc:'ดูผลลัพธ์ของการตัดสินใจที่มีต่อระบบและ Zero Trust Shield'},
+    {n:6, title:'Security Debrief', desc:'สรุปเหตุผล มาตรการที่แนะนำ หลักการ Zero Trust และคะแนนที่ได้รับ'}
+  ];
+
+  missions = [
+    {id:1, name:'Unknown Device', category:'Device', interaction:'เลือกมาตรการ', principle:'Verify Explicitly', difficulty:2, actionCount:4, thumbBg:'#1c2f7a',
+      scenario:'ระบบตรวจพบว่าพนักงานคนหนึ่งเข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่านที่ถูกต้องทุกประการ แต่การ Login ครั้งนี้มาจากอุปกรณ์ที่ไม่เคยลงทะเบียนหรือใช้งานมาก่อนในระบบขององค์กร ทำให้ไม่สามารถยืนยันได้ว่าอุปกรณ์นี้ปลอดภัยหรือถูกดักจับ Session ไปใช้งานโดยผู้ไม่หวังดี'},
+    {id:2, name:'Suspicious Login', category:'Identity', interaction:'เลือกมาตรการ', principle:'Assume Breach', difficulty:3, actionCount:4, thumbBg:'#12205c',
+      scenario:'บัญชีผู้ดูแลระบบ (Admin) มีความพยายาม Login เข้าใช้งานจากตำแหน่งทางภูมิศาสตร์ที่ไม่คุ้นเคยหลายครั้งภายในเวลาไม่ถึง 5 นาที ซึ่งเป็นพฤติกรรมที่ผิดปกติอย่างชัดเจนเมื่อเทียบกับรูปแบบการใช้งานปกติของบัญชีนี้ และอาจบ่งชี้ว่า Credential ถูกขโมยไปแล้ว'},
+    {id:3, name:'Vendor Access', category:'Access', interaction:'เลือกหลายมาตรการ', principle:'Least Privilege', difficulty:3, actionCount:6, thumbBg:'#2a3a7a',
+      scenario:'บริษัท Vendor ภายนอกติดต่อขอสิทธิ์เข้าถึงระบบภายในองค์กรเพื่อดำเนินการซ่อมบำรุงระบบชั่วคราวตามสัญญา แต่คำขอที่ส่งมาระบุสิทธิ์การเข้าถึงในระดับที่กว้างกว่าที่งานซ่อมบำรุงจำเป็นต้องใช้จริง'},
+    {id:4, name:'MFA Bombing', category:'Incident Response', interaction:'เรียงลำดับ', principle:'Continuous Monitoring', difficulty:4, actionCount:5, thumbBg:'#7a1c2f',
+      scenario:'พนักงานรายหนึ่งได้รับการแจ้งเตือนขอยืนยันตัวตนผ่าน MFA (Multi-Factor Authentication) จำนวนมากผิดปกติในช่วงเวลาไล่เลี่ยกัน ทั้งที่ตนเองไม่ได้พยายาม Login ซึ่งเป็นเทคนิคที่ผู้โจมตีใช้เพื่อรบกวนจนผู้ใช้กดยืนยันโดยไม่ตั้งใจ (MFA Fatigue Attack)'},
+    {id:5, name:'Impossible Travel', category:'Monitoring', interaction:'วิเคราะห์หลักฐาน', principle:'Verify Explicitly', difficulty:3, actionCount:4, thumbBg:'#1c5a7a',
+      scenario:'บัญชีผู้ใช้เดียวกันมีการ Login เข้าใช้งานจากสองประเทศที่อยู่ห่างกันมากในช่วงเวลาห่างกันเพียงไม่กี่นาที ซึ่งเป็นไปไม่ได้ในทางกายภาพที่บุคคลเดียวจะเดินทางไปถึงได้ทันเวลา จึงบ่งชี้ว่าอาจมีผู้อื่นถือ Credential นี้อยู่ด้วย'},
+    {id:6, name:'Lost MFA Device', category:'Identity', interaction:'เลือกมาตรการ', principle:'Assume Breach', difficulty:2, actionCount:4, thumbBg:'#4a1c7a',
+      scenario:'พนักงานแจ้งว่าโทรศัพท์มือถือที่ใช้เป็นอุปกรณ์ยืนยันตัวตนสองชั้น (MFA) สูญหาย ทำให้อุปกรณ์ดังกล่าวอาจตกไปอยู่ในมือของผู้ไม่หวังดีที่สามารถใช้ยืนยันตัวตนแทนพนักงานคนนั้นและเข้าถึงระบบต่าง ๆ ที่ผูกไว้กับอุปกรณ์นี้ได้'},
+    {id:7, name:'Credential Stolen', category:'Identity', interaction:'เลือกมาตรการ', principle:'Assume Breach', difficulty:3, actionCount:4, thumbBg:'#12205c',
+      scenario:'ทีม Security ตรวจพบว่า Username และ Password ของพนักงานคนหนึ่งถูกนำไปเผยแพร่และขายในตลาดมืดบนอินเทอร์เน็ต (Dark Web) ซึ่งหมายความว่า Credential นี้ไม่ปลอดภัยอีกต่อไปแม้เจ้าของบัญชีจะยังไม่รู้ตัวว่าถูกขโมย'},
+    {id:8, name:'Remote Working', category:'Access', interaction:'เลือกหลายมาตรการ', principle:'Least Privilege', difficulty:2, actionCount:6, thumbBg:'#2a3a7a',
+      scenario:'พนักงานขอเข้าถึงระบบและข้อมูลของบริษัทจากที่บ้านผ่านเครือข่าย Wi-Fi ส่วนตัวที่ไม่มีการเข้ารหัสหรือมาตรการป้องกันความปลอดภัยใด ๆ ทำให้ข้อมูลที่รับส่งระหว่างอุปกรณ์กับระบบบริษัทมีความเสี่ยงถูกดักฟังหรือโจมตีระหว่างทาง'},
+    {id:9, name:'Sensitive Data Access', category:'Access', interaction:'วิเคราะห์หลักฐาน', principle:'Least Privilege', difficulty:4, actionCount:4, thumbBg:'#1c5a7a',
+      scenario:'บัญชีผู้ใช้งานระดับปฏิบัติการทั่วไป ซึ่งปกติไม่มีความจำเป็นต้องเข้าถึงข้อมูลลูกค้าระดับ Confidential พยายามเรียกดูข้อมูลชุดนี้อย่างผิดปกติ อาจเกิดจากสิทธิ์ที่ตั้งค่าไว้กว้างเกินไป หรือบัญชีถูกควบคุมโดยผู้ไม่หวังดี'},
+    {id:10, name:'Unmanaged Device', category:'Device', interaction:'เลือกมาตรการ', principle:'Verify Explicitly', difficulty:2, actionCount:4, thumbBg:'#1c2f7a',
+      scenario:'มีอุปกรณ์ส่วนตัวที่ไม่ได้ลงทะเบียนหรือติดตั้งซอฟต์แวร์ป้องกันขององค์กรพยายามเชื่อมต่อเข้าสู่ VPN ของบริษัท ทำให้ไม่สามารถยืนยันได้ว่าอุปกรณ์นี้ปราศจากมัลแวร์หรือมีการตั้งค่าความปลอดภัยที่เหมาะสมก่อนอนุญาตให้เข้าถึงเครือข่ายภายใน'},
+    {id:11, name:'Incident Reporting', category:'Incident Response', interaction:'เรียงลำดับ', principle:'Continuous Monitoring', difficulty:3, actionCount:5, thumbBg:'#7a1c2f',
+      scenario:'หลังตรวจพบเหตุการณ์ผิดปกติในระบบ ทีม Security ต้องดำเนินการตามขั้นตอนการรายงานและจัดการ Incident ให้ถูกลำดับ ตั้งแต่การตรวจสอบ แจ้งเตือน จนถึงการบันทึกเหตุการณ์ เพื่อให้สามารถติดตามและป้องกันเหตุซ้ำได้อย่างมีระบบ'},
+    {id:12, name:'Account Recovery', category:'Identity', interaction:'เรียงลำดับ', principle:'Verify Explicitly', difficulty:3, actionCount:5, thumbBg:'#7a1c2f',
+      scenario:'ผู้ใช้งานติดต่อขอกู้คืนบัญชีของตนเองหลังจากทำอุปกรณ์ที่ใช้ยืนยันตัวตนสูญหาย ทีมสนับสนุนต้องตรวจสอบตัวตนที่แท้จริงของผู้ขอกู้คืนอย่างรอบคอบตามลำดับขั้นตอนที่ถูกต้อง เพื่อป้องกันไม่ให้ผู้แอบอ้างสวมรอยเข้ายึดบัญชี'},
+    {id:13, name:'Data Breach Response', category:'Incident Response', interaction:'เรียงลำดับ', principle:'Continuous Monitoring', difficulty:5, actionCount:5, thumbBg:'#7a1c2f',
+      scenario:'มีการตรวจพบว่าข้อมูลส่วนบุคคลของลูกค้าจำนวนมากรั่วไหลออกจากระบบภายในองค์กร ทีม Security ต้องรับมือกับสถานการณ์วิกฤตนี้ตามลำดับขั้นตอนที่ถูกต้อง เพื่อจำกัดความเสียหาย แจ้งผู้เกี่ยวข้อง และป้องกันการรั่วไหลเพิ่มเติม'},
+    {id:14, name:'Risky Application Consent', category:'Access', interaction:'วิเคราะห์หลักฐาน', principle:'Least Privilege', difficulty:3, actionCount:4, thumbBg:'#1c5a7a',
+      scenario:'พนักงานกดยินยอม (Allow) ให้แอปพลิเคชันภายนอกที่ไม่รู้จักเข้าถึงข้อมูลอีเมลและไฟล์ขององค์กรโดยไม่ได้ตรวจสอบสิทธิ์ที่ขอก่อน ทำให้แอปดังกล่าวอาจดึงข้อมูลสำคัญออกจากระบบได้โดยไม่มีใครสังเกตเห็น'},
+    {id:15, name:'Abnormal Mass Download', category:'Monitoring', interaction:'วิเคราะห์หลักฐาน', principle:'Continuous Monitoring', difficulty:4, actionCount:4, thumbBg:'#1c5a7a',
+      scenario:'ระบบตรวจพบว่าบัญชีผู้ใช้รายหนึ่งดาวน์โหลดไฟล์จากระบบจัดเก็บข้อมูลขององค์กรเป็นจำนวนมากผิดปกติภายในเวลาอันสั้น ซึ่งไม่สอดคล้องกับพฤติกรรมการทำงานปกติ และอาจเป็นสัญญาณของการขโมยข้อมูลออกจากองค์กร'},
+    {id:16, name:'Phishing Email Click', category:'Social Engineering', interaction:'เลือกมาตรการ', principle:'Assume Breach', difficulty:2, actionCount:4, thumbBg:'#4a1c7a',
+      scenario:'พนักงานได้รับอีเมลที่แอบอ้างเป็นหน่วยงานที่น่าเชื่อถือ และหลงคลิกลิงก์ปลอมพร้อมกรอกชื่อผู้ใช้และรหัสผ่านของตนเองลงในหน้าเว็บที่ผู้โจมตีสร้างขึ้นเพื่อดักจับข้อมูล Credential ไปใช้งานต่อ'},
+    {id:17, name:'Fake IT Support Call', category:'Social Engineering', interaction:'เลือกมาตรการ', principle:'Verify Explicitly', difficulty:3, actionCount:4, thumbBg:'#4a1c7a',
+      scenario:'มีผู้โทรเข้ามาแอบอ้างว่าเป็นเจ้าหน้าที่ทีม IT ขององค์กร และขอให้พนักงานแจ้งรหัสผ่านหรือรหัส OTP เพื่อ "แก้ไขปัญหาระบบ" ซึ่งเป็นเทคนิค Social Engineering ที่ใช้หลอกให้เหยื่อเปิดเผยข้อมูลสำคัญด้วยตนเอง'},
+    {id:18, name:'Privileged Account Misuse', category:'Access', interaction:'เลือกหลายมาตรการ', principle:'Least Privilege', difficulty:4, actionCount:6, thumbBg:'#2a3a7a',
+      scenario:'บัญชี Admin ที่มีสิทธิ์สูงถูกใช้งานเข้าถึงระบบในช่วงเวลานอกเวลาทำการ และเข้าถึงระบบที่ไม่เกี่ยวข้องกับหน้าที่ความรับผิดชอบตามปกติของผู้ใช้บัญชีนี้ ซึ่งอาจบ่งชี้ว่าบัญชีถูกนำไปใช้ในทางที่ผิดหรือถูกยึดควบคุมโดยผู้ไม่หวังดี'},
+    {id:19, name:'Third-Party API Breach', category:'Monitoring', interaction:'วิเคราะห์หลักฐาน', principle:'Continuous Monitoring', difficulty:4, actionCount:4, thumbBg:'#1c5a7a',
+      scenario:'ระบบของ Partner ภายนอกที่เชื่อมต่อกับองค์กรผ่าน API ถูกโจมตีและอาจถูกใช้เป็นช่องทางเข้าถึงข้อมูลหรือระบบขององค์กรทางอ้อม แม้ว่าระบบภายในขององค์กรเองจะยังไม่ถูกเจาะโดยตรงก็ตาม'},
+    {id:20, name:'Shadow IT Discovery', category:'Device', interaction:'เลือกหลายมาตรการ', principle:'Least Privilege', difficulty:3, actionCount:6, thumbBg:'#2a3a7a',
+      scenario:'ทีม Security ตรวจพบว่าทีมงานบางส่วนในองค์กรใช้แอปพลิเคชัน Cloud ของบุคคลที่สามที่ไม่ได้รับการอนุมัติจากฝ่าย IT ในการจัดเก็บและแบ่งปันข้อมูลของบริษัท ทำให้ข้อมูลอยู่นอกการควบคุมและมาตรการป้องกันขององค์กร'}
+  ];
+  categories = ['Identity','Device','Access','Monitoring','Social Engineering','Incident Response'];
+  interactions = ['เลือกมาตรการ','เลือกหลายมาตรการ','เรียงลำดับ','วิเคราะห์หลักฐาน'];
+  recommendedTimes = {'เลือกมาตรการ':30, 'วิเคราะห์หลักฐาน':45, 'เลือกหลายมาตรการ':60, 'เรียงลำดับ':90};
+  interactionLabels = {single:'เลือกมาตรการ', multi:'เลือกหลายมาตรการ', sequence:'เรียงลำดับ', risk:'วิเคราะห์หลักฐาน'};
+  barColors = ['#2ecc71','#35d0ff','#f5a623','#ff8a3d','#ff4d4d'];
+
+  defenseLayers = [
+    {id:'mfa', label:'Multi-Factor Authentication', icon:'⚿', detail:'บังคับให้ผู้ใช้ยืนยันตัวตนมากกว่าหนึ่งวิธี (เช่น รหัสผ่าน + OTP) ก่อนเข้าสู่ระบบ ช่วยสกัด Credential ที่ถูกขโมยไม่ให้ใช้งานได้ทันที',
+      question:'เพราะเหตุใด MFA จึงป้องกัน Credential ที่ถูกขโมยได้?', options:[
+        {id:'a', label:'เพราะรหัสผ่านอย่างเดียวไม่พอ ต้องมีการยืนยันอีกชั้นที่ผู้โจมตีไม่มี', correct:true},
+        {id:'b', label:'เพราะทำให้รหัสผ่านยากขึ้นเท่านั้น', correct:false},
+        {id:'c', label:'เพราะเปลี่ยนรหัสผ่านให้บ่อยขึ้นโดยอัตโนมัติ', correct:false},
+        {id:'d', label:'เพราะซ่อนชื่อผู้ใช้ไม่ให้ผู้โจมตีเห็น', correct:false}
+      ],
+      reason:'ถูกต้อง — MFA เพิ่มปัจจัยยืนยันตัวตนอีกชั้นที่ผู้โจมตีไม่มี แม้จะขโมยรหัสผ่านไปได้ก็ยังผ่านเข้าระบบไม่ได้',
+      setupQuestion:'ควรตั้งค่า MFA อย่างไรให้ได้ผลจริง?', setupOptions:[
+        {id:'a', label:'บังคับใช้ MFA กับทุกบัญชีที่มีสิทธิ์สูง และเลือกวิธียืนยันที่สองที่เชื่อถือได้ เช่น Authenticator App', correct:true},
+        {id:'b', label:'เปิด MFA ไว้เฉยๆ โดยไม่บังคับให้บัญชีสำคัญต้องใช้', correct:false},
+        {id:'c', label:'ใช้ MFA เฉพาะตอน Login ครั้งแรกที่สร้างบัญชีเท่านั้น', correct:false},
+        {id:'d', label:'ให้ผู้ใช้เลือกเปิดหรือปิด MFA ได้เองตามใจชอบ', correct:false}
+      ], setupReason:'ถูกต้อง — MFA ต้องบังคับใช้กับบัญชีสำคัญและใช้วิธียืนยันที่น่าเชื่อถือ ไม่ใช่เปิดไว้แบบเลือกได้เอง'},
+    {id:'device', label:'Device Verification', icon:'▣', detail:'ตรวจสอบว่าอุปกรณ์ที่ใช้ Login เป็นอุปกรณ์ที่ลงทะเบียนและปลอดภัยหรือไม่ ก่อนอนุญาตให้เข้าถึงระบบ',
+      question:'เหตุใดต้องตรวจสอบอุปกรณ์ก่อนอนุญาตเข้าระบบ?', options:[
+        {id:'a', label:'เพื่อให้ระบบทำงานเร็วขึ้น', correct:false},
+        {id:'b', label:'เพื่อยืนยันว่าอุปกรณ์ไม่ได้ถูกใช้สวมรอยหรือมีมัลแวร์', correct:true},
+        {id:'c', label:'เพื่อให้ผู้ใช้จำรหัสผ่านได้ง่ายขึ้น', correct:false},
+        {id:'d', label:'เพื่อลดค่าใช้จ่ายด้านฮาร์ดแวร์', correct:false}
+      ],
+      reason:'ถูกต้อง — Login ด้วยรหัสผ่านที่ถูกต้องไม่ได้แปลว่าอุปกรณ์นั้นปลอดภัย จึงต้องตรวจสอบอุปกรณ์เพื่อคัดกรองการสวมรอยหรือมัลแวร์',
+      setupQuestion:'ขั้นตอนใดจำเป็นที่สุดในการตั้งค่า Device Verification?', setupOptions:[
+        {id:'a', label:'ตั้งกฎ Conditional Access ให้บล็อกอุปกรณ์ที่ไม่ได้ลงทะเบียนไว้ก่อน', correct:true},
+        {id:'b', label:'อนุญาตทุกอุปกรณ์เข้าก่อนแล้วค่อยตรวจสอบทีหลัง', correct:false},
+        {id:'c', label:'ให้ผู้ใช้ตั้งชื่ออุปกรณ์เองโดยไม่ต้องยืนยันตัวจริง', correct:false},
+        {id:'d', label:'ปล่อยให้ทุกอุปกรณ์เข้าถึงได้เท่ากันโดยไม่แยกประเภท', correct:false}
+      ], setupReason:'ถูกต้อง — ต้องบล็อกอุปกรณ์ที่ไม่ได้ลงทะเบียนไว้ก่อนเป็นค่าเริ่มต้น แล้วอนุญาตเฉพาะอุปกรณ์ที่ผ่านการตรวจสอบ'},
+    {id:'least', label:'Least Privilege Access', icon:'◈', detail:'จำกัดสิทธิ์การเข้าถึงของผู้ใช้และบัญชีให้เหลือเท่าที่จำเป็นต่องานจริงเท่านั้น ลดความเสียหายหากบัญชีถูกเจาะ',
+      question:'Least Privilege ช่วยลดความเสียหายอย่างไร?', options:[
+        {id:'a', label:'จำกัดสิ่งที่ผู้โจมตีเข้าถึงได้แม้ยึดบัญชีได้สำเร็จ', correct:true},
+        {id:'b', label:'ทำให้ผู้ใช้ทำงานได้เร็วขึ้น', correct:false},
+        {id:'c', label:'เพิ่มพื้นที่จัดเก็บข้อมูลให้บัญชีผู้ใช้', correct:false},
+        {id:'d', label:'ทำให้รหัสผ่านคาดเดายากขึ้น', correct:false}
+      ],
+      reason:'ถูกต้อง — หากผู้โจมตียึดบัญชีที่มีสิทธิ์จำกัดได้ ความเสียหายก็ถูกจำกัดตามสิทธิ์นั้นด้วย ไม่ลุกลามไปทั้งระบบ',
+      setupQuestion:'เมื่อทบทวนสิทธิ์ผู้ใช้ (Access Review) แล้วพบสิทธิ์ที่ไม่ได้ใช้งาน ควรทำอย่างไร?', setupOptions:[
+        {id:'a', label:'ยกเลิกสิทธิ์ที่ไม่ได้ใช้งานหรือเกินความจำเป็นทันที', correct:true},
+        {id:'b', label:'เก็บสิทธิ์ไว้เผื่อได้ใช้ในอนาคต', correct:false},
+        {id:'c', label:'มอบสิทธิ์เพิ่มให้ทุกคนเผื่อสะดวกในการทำงาน', correct:false},
+        {id:'d', label:'รอให้ผู้ใช้แจ้งเองว่าต้องการยกเลิกสิทธิ์', correct:false}
+      ], setupReason:'ถูกต้อง — สิทธิ์ที่ไม่ได้ใช้งานคือความเสี่ยงที่ไม่จำเป็น ต้องยกเลิกทันทีเพื่อลดพื้นที่การโจมตี'},
+    {id:'temp', label:'Temporary Access', icon:'◷', detail:'กำหนดเวลาสิ้นสุดของสิทธิ์การเข้าถึงโดยอัตโนมัติ เพื่อไม่ให้สิทธิ์ที่ให้ไว้ชั่วคราวหลงเหลืออยู่นานเกินจำเป็น',
+      question:'เหตุใดสิทธิ์ชั่วคราวควรมีวันหมดอายุ?', options:[
+        {id:'a', label:'เพื่อไม่ให้สิทธิ์ที่ไม่จำเป็นหลงเหลืออยู่จนถูกใช้ในทางที่ผิด', correct:true},
+        {id:'b', label:'เพื่อประหยัดพื้นที่ในระบบ', correct:false},
+        {id:'c', label:'เพื่อให้ผู้ใช้ Login ได้เร็วขึ้น', correct:false},
+        {id:'d', label:'เพื่อลดจำนวนรหัสผ่านที่ต้องจำ', correct:false}
+      ],
+      reason:'ถูกต้อง — สิทธิ์ที่ไม่มีวันหมดอายุมีแนวโน้มถูกหลงเหลือและนำไปใช้ในทางที่ผิดในระยะยาว',
+      setupQuestion:'วิธีตั้งค่า Temporary Access ที่ถูกต้องคือ?', setupOptions:[
+        {id:'a', label:'เปิด Just-In-Time Access และกำหนดวันหมดอายุอัตโนมัติทุกครั้งที่อนุมัติสิทธิ์', correct:true},
+        {id:'b', label:'อนุมัติสิทธิ์ชั่วคราวแบบไม่มีวันหมดอายุเพื่อความสะดวก', correct:false},
+        {id:'c', label:'ให้ผู้ใช้ต่ออายุสิทธิ์ของตัวเองได้ไม่จำกัดครั้ง', correct:false},
+        {id:'d', label:'อนุมัติสิทธิ์ทั้งหมดแบบถาวรตั้งแต่ครั้งแรก', correct:false}
+      ], setupReason:'ถูกต้อง — Just-In-Time Access พร้อมวันหมดอายุอัตโนมัติทำให้สิทธิ์ชั่วคราวไม่หลงเหลืออยู่นานเกินจำเป็น'},
+    {id:'session', label:'Session Control', icon:'⌁', detail:'ตรวจสอบและควบคุม Session ที่กำลังใช้งาน สามารถระงับ Session ที่ต้องสงสัยได้ทันทีโดยไม่ต้องรอให้ผู้ใช้ Logout',
+      question:'ประโยชน์หลักของ Session Control คืออะไร?', options:[
+        {id:'a', label:'ระงับ Session ที่ต้องสงสัยได้ทันทีโดยไม่ต้องรอผู้ใช้ Logout', correct:true},
+        {id:'b', label:'ทำให้ Login เร็วขึ้น', correct:false},
+        {id:'c', label:'ลดจำนวนรหัสผ่านที่ต้องใส่', correct:false},
+        {id:'d', label:'เพิ่มความจำของอุปกรณ์', correct:false}
+      ],
+      reason:'ถูกต้อง — การควบคุม Session ทำให้ตัดการเข้าถึงได้ทันทีเมื่อพบความเสี่ยง โดยไม่ต้องรอผู้ใช้ Logout เอง',
+      setupQuestion:'ควรกำหนดเงื่อนไข Session ผิดปกติอย่างไร?', setupOptions:[
+        {id:'a', label:'ตรวจจับเมื่อตำแหน่งหรืออุปกรณ์เปลี่ยนกลางทาง แล้วให้ระงับ Session ได้จากศูนย์กลางทันที', correct:true},
+        {id:'b', label:'ปล่อยให้ Session ทำงานต่อไปจนกว่าผู้ใช้จะ Logout เอง', correct:false},
+        {id:'c', label:'ตรวจสอบ Session เพียงวันละครั้งตอนเช้า', correct:false},
+        {id:'d', label:'ให้ผู้ใช้แจ้งเองหาก Session ผิดปกติ', correct:false}
+      ], setupReason:'ถูกต้อง — ตำแหน่ง/อุปกรณ์ที่เปลี่ยนกลางทางคือสัญญาณเสี่ยงชัดเจน ต้องระงับได้จากศูนย์กลางทันทีเพื่อลดความเสียหาย'},
+    {id:'monitor', label:'Continuous Monitoring', icon:'◉', detail:'เฝ้าระวังพฤติกรรมการใช้งานอย่างต่อเนื่องแบบ Real-time เพื่อจับสัญญาณความผิดปกติให้เร็วที่สุด',
+      question:'Continuous Monitoring ช่วยอะไร?', options:[
+        {id:'a', label:'ตรวจจับพฤติกรรมผิดปกติได้เร็วแบบ Real-time', correct:true},
+        {id:'b', label:'ลดจำนวนผู้ใช้ในระบบ', correct:false},
+        {id:'c', label:'เพิ่มความเร็วอินเทอร์เน็ตขององค์กร', correct:false},
+        {id:'d', label:'ลดจำนวนอุปกรณ์ที่ต้องดูแล', correct:false}
+      ],
+      reason:'ถูกต้อง — การเฝ้าระวังแบบ Real-time ทำให้ตรวจจับและตอบสนองต่อพฤติกรรมผิดปกติได้เร็วกว่าการตรวจสอบเป็นรอบ',
+      setupQuestion:'ก่อนตั้งกฎแจ้งเตือนความผิดปกติ ควรทำอะไรก่อน?', setupOptions:[
+        {id:'a', label:'กำหนด Baseline พฤติกรรมปกติของผู้ใช้แต่ละกลุ่มก่อน', correct:true},
+        {id:'b', label:'ตั้งกฎแจ้งเตือนทันทีโดยไม่ต้องดูพฤติกรรมปกติก่อน', correct:false},
+        {id:'c', label:'รอให้เกิดเหตุการณ์ก่อนแล้วค่อยตั้งกฎย้อนหลัง', correct:false},
+        {id:'d', label:'ปิดการแจ้งเตือนทั้งหมดเพื่อลดความยุ่งยาก', correct:false}
+      ], setupReason:'ถูกต้อง — ต้องรู้ว่าพฤติกรรม "ปกติ" เป็นอย่างไรก่อน จึงจะตั้งกฎจับความผิดปกติได้อย่างแม่นยำ'},
+    {id:'reauth', label:'Re-Authentication', icon:'⟲', detail:'บังคับให้ผู้ใช้ยืนยันตัวตนซ้ำก่อนทำรายการที่มีความเสี่ยงสูงหรือเข้าถึงข้อมูลสำคัญ แม้จะ Login ไว้แล้วก็ตาม',
+      question:'เหตุใดต้อง Re-Authenticate แม้ Login ไว้แล้ว?', options:[
+        {id:'a', label:'เพราะ Session ที่ Login ไว้อาจถูกขโมยไปใช้งานต่อได้', correct:true},
+        {id:'b', label:'เพราะระบบบังคับทุกคนโดยไม่มีเหตุผล', correct:false},
+        {id:'c', label:'เพราะช่วยให้จำรหัสผ่านได้ดีขึ้น', correct:false},
+        {id:'d', label:'เพราะทำให้ระบบทำงานเร็วขึ้น', correct:false}
+      ],
+      reason:'ถูกต้อง — Session ที่ Login ไว้แล้วอาจถูกขโมย (Session Hijacking) ไปใช้งานต่อได้ การยืนยันซ้ำจึงช่วยยืนยันว่าเป็นเจ้าของจริง',
+      setupQuestion:'ควรกำหนด Action ใดให้ต้อง Re-Authenticate?', setupOptions:[
+        {id:'a', label:'Action ที่มีความเสี่ยงสูง เช่น เปลี่ยนรหัสผ่าน หรือโอนเงิน', correct:true},
+        {id:'b', label:'Action ทั่วไปทุกประเภทโดยไม่แยกระดับความเสี่ยง', correct:false},
+        {id:'c', label:'เฉพาะตอน Login ครั้งแรกของวันเท่านั้น', correct:false},
+        {id:'d', label:'ไม่ต้องกำหนด ปล่อยให้ผู้ใช้ตัดสินใจเอง', correct:false}
+      ], setupReason:'ถูกต้อง — ต้องเจาะจงเฉพาะ Action ที่มีความเสี่ยงสูง เพื่อไม่ให้ผู้ใช้ถูกรบกวนด้วยการยืนยันซ้ำเกินความจำเป็น'}
+  ];
+  attackSteps = [
+    {step:1, text:'Credential ถูกขโมยผ่าน Phishing', needs:'mfa'},
+    {step:2, text:'พยายาม Login จากอุปกรณ์ที่ไม่รู้จัก', needs:'device'},
+    {step:3, text:'ระบบเรียก MFA Challenge', needs:'mfa'},
+    {step:4, text:'พยายามเข้าถึงข้อมูลสำคัญ', needs:'least'},
+    {step:5, text:'พยายามดาวน์โหลดข้อมูลจำนวนมาก', needs:'session'},
+    {step:6, text:'Monitoring ตรวจพบพฤติกรรมผิดปกติ', needs:'monitor'},
+    {step:7, text:'ระบบบังคับ Re-Authentication', needs:'reauth'},
+    {step:8, text:'Zero Trust Shield สรุปผลการป้องกัน', needs:null}
+  ];
+
+  setScreen(id){ this.setState({activeScreen:id}); }
+  goHowToPlay(){ this.setState({activeScreen:'howToPlay'}); }
+  goHome(){ this.setState({activeScreen:'home'}); }
+  goPlay(){ this.setState({activeScreen:'missionSelect'}); }
+  buildQrDataUrl(text){
+    const qr = qrcode(0, 'M');
+    qr.addData(text);
+    qr.make();
+    return qr.createDataURL(8, 4);
+  }
+  goJoiningRoom(){
+    const overrideTime = this.state.useRecommended ? null : this.state.customTime;
+    this.socket.emit('host:create', { missionIds: this.state.selectedMissions, overrideTime }, (res) => {
+      if (!res || !res.ok) return;
+      const joinUrl = `${window.location.origin}/play?pin=${res.pin}`;
+      this.setState({
+        activeScreen:'joiningRoom', pin: res.pin, livePlayers: [],
+        joinUrl, qrDataUrl: this.buildQrDataUrl(joinUrl)
+      });
+    });
+  }
+  showAnswer(){
+    this.socket.emit('host:reveal', { pin: this.state.pin }, (res) => {
+      if (!res || !res.ok) return;
+      this.setState({ activeScreen:'answerReveal', revealData: res, leaderboardLive: res.leaderboard || [] });
+    });
+  }
+  goLeaderboardFromAnswer(){
+    this.setState({activeScreen:'liveControl'});
+  }
+  finishGame(){
+    this.socket.emit('host:endGame', { pin: this.state.pin }, (res) => {
+      this.setState({ activeScreen:'winning', finalLeaderboard: (res && res.leaderboard) || this.state.leaderboardLive });
+    });
+  }
+  toggleCat(c){ this.setState(s=>({catFilter: s.catFilter===c?'all':c})); }
+  toggleInter(i){ this.setState(s=>({interFilter: s.interFilter===i?'all':i})); }
+  toggleMissionCheck(id){
+    this.setState(s=>{
+      const has = s.selectedMissions.includes(id);
+      return {selectedMissions: has? s.selectedMissions.filter(x=>x!==id) : [...s.selectedMissions, id]};
+    });
+  }
+  toggleRecommended(){ this.setState(s=>({useRecommended: !s.useRecommended})); }
+  onTimeChange(e){ this.setState({customTime: Number(e.target.value)}); }
+  setFinalDifficulty(id){ this.setState({finalAttackDifficulty:id}); }
+  beginRound(){
+    this.socket.emit('host:beginRound', { pin: this.state.pin }, (res) => {
+      if (!res || !res.ok) return;
+      if (this._roundTimer) clearInterval(this._roundTimer);
+      const isDefense = res.mission.interaction === 'defense';
+      this.setState({
+        activeScreen: isDefense ? 'finalAttack' : 'question',
+        roundMission: res.mission, roundIndex: res.roundIndex,
+        totalRoundsLive: res.totalRounds, isLastRoundLive: res.isLastRound,
+        submittedCount: 0, revealData: null, timeLeft: res.mission.recTime || 0
+      });
+      if (res.mission.recTime) {
+        this._roundTimer = setInterval(() => {
+          this.setState(s => ({ timeLeft: Math.max(0, s.timeLeft - 1) }));
+        }, 1000);
+      }
+    });
+  }
+  startLoading(){
+    if (this._timer) clearInterval(this._timer);
+    this.socket.emit('host:startGame', { pin: this.state.pin });
+    this.setState({activeScreen:'loading', loadingSeconds:5});
+    this._timer = setInterval(() => {
+      this.setState(s => {
+        const next = s.loadingSeconds - 1;
+        if (next <= 0) {
+          clearInterval(this._timer);
+          this.beginRound();
+          return {loadingSeconds: next};
+        }
+        return {loadingSeconds: next};
+      });
+    }, 1000);
+  }
+  toggleReveal(){ this.setState(s=>({revealRecommended: !s.revealRecommended})); }
+  toggleEvidenceHint(){ this.setState(s=>({showEvidenceHint: !s.showEvidenceHint})); }
+  advanceRound(){
+    if (this.state.isLastRoundLive) { this.finishGame(); return; }
+    this.beginRound();
+  }
+  toggleLayer(id){
+    this.setState(s=>{
+      const has = s.deployedLayers.includes(id);
+      if (has) {
+        return {
+          deployedLayers: s.deployedLayers.filter(x=>x!==id),
+          completedTasks: s.completedTasks.filter(x=>x!==id),
+          completedSetupTasks: s.completedSetupTasks.filter(x=>x!==id),
+          ackedQ1: s.ackedQ1.filter(x=>x!==id),
+          openLayerMenuId:null
+        };
+      }
+      return {deployedLayers: [...s.deployedLayers, id], openLayerMenuId:null};
+    });
+  }
+  openLayerMenu(id){ this.setState(s=>({openLayerMenuId: s.openLayerMenuId===id? null : id})); }
+  openLayerDetail(id){ this.setState({detailLayerId:id, openLayerMenuId:null, taskWrongId:null, setupWrongId:null}); }
+  ackQ1(id){ this.setState(s=>({ackedQ1: s.ackedQ1.includes(id) ? s.ackedQ1 : [...s.ackedQ1, id]})); }
+  closeLayerDetail(){ this.setState({detailLayerId:null, taskWrongId:null, setupWrongId:null}); }
+  answerTask(layerId, optionId, correct){
+    if (correct) {
+      this.setState(s => ({completedTasks: s.completedTasks.includes(layerId) ? s.completedTasks : [...s.completedTasks, layerId], taskWrongId:null}));
+    } else {
+      this.setState({taskWrongId: optionId});
+    }
+  }
+  answerSetupTask(layerId, optionId, correct){
+    if (correct) {
+      this.setState(s => ({completedSetupTasks: s.completedSetupTasks.includes(layerId) ? s.completedSetupTasks : [...s.completedSetupTasks, layerId], setupWrongId:null}));
+      if (!this.state.deployedLayers.includes(layerId)) this.toggleLayer(layerId);
+      setTimeout(() => this.setState({detailLayerId:null}), 700);
+    } else {
+      this.setState({setupWrongId: optionId});
+    }
+  }
+  confirmLayerFromDetail(id){
+    this.toggleLayer(id);
+    this.setState({detailLayerId:null});
+  }
+
+  tabBtnStyle(active){
+    return `padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font:600 11.5px 'Chakra Petch';white-space:nowrap;background:${active?'#e2231c':'rgba(255,255,255,.12)'};color:#fff`;
+  }
+  chipStyle(active){
+    return `padding:7px 13px;border-radius:20px;border:1px solid ${active?'#35d0ff':'rgba(53,208,255,.2)'};cursor:pointer;font:600 11.5px 'Chakra Petch';background:${active?'linear-gradient(135deg,#35d0ff,#a78bfa)':'rgba(255,255,255,.04)'};color:${active?'#05070f':'#a9c2e0'}`;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const tabs = this.screensData.map(sc => ({
+      label: sc.label, onClick: () => this.setScreen(sc.id),
+      style: this.tabBtnStyle(s.activeScreen===sc.id)
+    }));
+
+    const missionsView = this.missions
+      .filter(m => s.catFilter==='all' || m.category===s.catFilter)
+      .filter(m => s.interFilter==='all' || m.interaction===s.interFilter)
+      .map(m => {
+        const sel = s.selectedMissions.includes(m.id);
+        return {
+          ...m,
+          difficultyDots: '●'.repeat(m.difficulty)+'○'.repeat(5-m.difficulty),
+          recTime: this.recommendedTimes[m.interaction],
+          checked: sel,
+          onCheck: () => this.toggleMissionCheck(m.id),
+          cardStyle: `border:2px solid ${sel?'#35d0ff':'rgba(53,208,255,.15)'};border-radius:14px;overflow:hidden;display:flex;flex-direction:column;background:${sel?'rgba(53,208,255,.1)':'rgba(255,255,255,.03)'};box-shadow:${sel?'0 0 20px -4px rgba(53,208,255,.4)':'none'}`
+        };
+      });
+    const catFilters = this.categories.map(c => ({label:c, onClick:()=>this.toggleCat(c), style:this.chipStyle(s.catFilter===c)}));
+    const interFilters = this.interactions.map(i => ({label:i, onClick:()=>this.toggleInter(i), style:this.chipStyle(s.interFilter===i)}));
+    const selectedCount = s.selectedMissions.length;
+    const noMissionSelected = selectedCount===0;
+    const missionNextStyle = `width:100%;padding:16px;border:none;border-radius:12px;font:700 15px 'Chakra Petch';letter-spacing:.04em;cursor:${selectedCount?'pointer':'not-allowed'};background:${selectedCount?'#e2231c':'rgba(255,255,255,.06)'};color:${selectedCount?'#fff':'rgba(255,255,255,.3)'}`;
+
+    const difficultyChips = this.difficultyLevels.map(d => ({
+      label: d.label, onClick: () => this.setFinalDifficulty(d.id),
+      style: this.chipStyle(s.finalAttackDifficulty===d.id)
+    }));
+    const selectedMissionNames = this.missions.filter(m => s.selectedMissions.includes(m.id)).map(m => m.name);
+    const finalDifficultyLabel = (this.difficultyLevels.find(d=>d.id===s.finalAttackDifficulty)||{}).label || '';
+    const missionSequenceLabel = selectedMissionNames.length
+      ? selectedMissionNames.join(' → ') + ` → Final Attack (ระดับ: ${finalDifficultyLabel})`
+      : '';
+
+    const pinDisplay = s.pin ? `${s.pin.slice(0,3)} ${s.pin.slice(3)}` : '——— ———';
+    const leaderboardTitle = `Leaderboard — PIN ${pinDisplay}`;
+    const livePlayerCount = s.livePlayers.length;
+    const joinedPlayersView = s.livePlayers;
+
+    const rankColors = {1:'#f5a623', 2:'#8a8fa3', 3:'#c88a4a'};
+    const sourceLeaderboard = s.finalLeaderboard || s.leaderboardLive || [];
+    const leaderboardView = sourceLeaderboard.map((lb) => ({
+      ...lb, shield: Math.min(30 + lb.score/10, 100).toFixed(0),
+      rankStyle: `width:30px;height:30px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font:700 13px 'Chakra Petch';color:#fff;background:${rankColors[lb.rank]||'#4a5178'}`
+    }));
+    const withShield = (p) => ({ ...p, shield: Math.min(30 + p.score/10, 100).toFixed(0) });
+    const finalBoard = (s.finalLeaderboard || []).map(withShield);
+    const winner = finalBoard[0] || {name:'—', score:0, shield:0};
+    const winningTitle = 'Winning Player';
+
+    const podiumSpecs = [
+      { rank:1, order:2, height:150, gold:'#f5a623', delay:.7 },
+      { rank:2, order:1, height:104, gold:'#c9ccd6', delay:.35 },
+      { rank:3, order:3, height:80, gold:'#c88a4a', delay:0 }
+    ];
+    const podiumView = podiumSpecs.map(spec => {
+      const p = finalBoard[spec.rank-1];
+      const isFirst = spec.rank === 1;
+      return {
+        rank: spec.rank, name: p ? p.name : '—', score: p ? p.score : 0, isFirst,
+        initial: p ? p.name.trim().charAt(0).toUpperCase() : '?',
+        colStyle: `order:${spec.order};display:flex;flex-direction:column;align-items:center;width:${isFirst?128:104}px`,
+        avatarStyle: `width:${isFirst?64:52}px;height:${isFirst?64:52}px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff,${spec.gold} 60%);display:flex;align-items:center;justify-content:center;font:700 ${isFirst?22:17}px 'Chakra Petch';color:#1c2f7a;animation:ncsa-podium-rise .5s cubic-bezier(.2,1.4,.4,1) ${spec.delay}s backwards${isFirst?',ncsa-glow-pulse 2s ease-in-out '+spec.delay+0.5+'s infinite':''}`,
+        nameStyle: `font:700 ${isFirst?14:12}px 'Chakra Petch';margin-top:8px;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;animation:ncsa-podium-rise .5s ease-out ${spec.delay}s backwards`,
+        scoreStyle: `font:700 ${isFirst?16:13}px 'Chakra Petch';color:#2ecc71;margin-top:2px;animation:ncsa-podium-rise .5s ease-out ${spec.delay}s backwards`,
+        crownStyle: `font-size:26px;animation:ncsa-crown-bounce .6s cubic-bezier(.2,1.4,.4,1) ${spec.delay+0.5}s backwards`,
+        baseStyle: `width:100%;height:${spec.height}px;margin-top:10px;border-radius:10px 10px 0 0;background:linear-gradient(180deg,${spec.gold},rgba(255,255,255,.08));display:flex;align-items:flex-start;justify-content:center;padding-top:10px;font:700 26px 'Chakra Petch';color:rgba(0,0,0,.35);animation:ncsa-podium-rise .55s cubic-bezier(.2,1.4,.4,1) ${spec.delay}s backwards`
+      };
+    });
+    const confettiColors = ['#e2231c','#35d0ff','#f5a623','#2ecc71','#a78bfa'];
+    const confettiView = Array.from({length:24}, (_, i) => {
+      const left = (i*37)%100;
+      const delay = (i%8)*0.3;
+      const duration = 3 + (i%4)*0.6;
+      const size = 6 + (i%3)*3;
+      const color = confettiColors[i%confettiColors.length];
+      return {
+        style: `position:absolute;top:-20px;left:${left}%;width:${size}px;height:${size*1.6}px;background:${color};opacity:.85;animation:ncsa-confetti-fall ${duration}s linear ${delay}s infinite`
+      };
+    });
+    const othersView = finalBoard.slice(3);
+    const hasOthers = othersView.length > 0;
+
+    const roundMission = s.roundMission;
+    const isLastRound = s.isLastRoundLive;
+    const roundProgressLabel = roundMission
+      ? `Round ${s.roundIndex+1} of ${s.totalRoundsLive} · ${roundMission.name}`
+      : `Round ${Math.max(s.roundIndex+1,1)} of ${s.totalRoundsLive}`;
+    const nextRoundLabel = isLastRound ? 'จบเกม — ดูผู้ชนะ →' : 'ภารกิจต่อไป →';
+    const currentMission = roundMission ? {
+      ...roundMission,
+      interaction: this.interactionLabels[roundMission.interaction] || roundMission.interaction,
+      recommendedAction: s.revealData ? s.revealData.recommended : '',
+      explanation: s.revealData ? s.revealData.explanation : ''
+    } : {name:'', scenario:'', interaction:'', principle:'', riskLabel:'', recTime:0, evidenceItems:[], recommendedAction:'', explanation:''};
+    const isQuestionRound = s.activeScreen==='question';
+    const isAnswerReveal = s.activeScreen==='answerReveal';
+    const isHowToPlay = s.activeScreen==='howToPlay';
+    const actionBars = s.revealData ? s.revealData.actionBars.map((b,idx) => ({...b, color: this.barColors[idx % this.barColors.length]})) : [];
+    const correctPct = s.revealData ? s.revealData.correctPct : 0;
+    const riskyPct = s.revealData ? s.revealData.riskyPct : 0;
+    const answeredLabel = `${s.submittedCount} / ${livePlayerCount}`;
+    const timeLeftStyle = `font:700 12px 'Chakra Petch';color:${s.timeLeft<=10?'#ff8a80':'#35d0ff'}`;
+
+    const shieldPct = Math.min(30 + s.deployedLayers.length*10, 100);
+    const CX = 230, CY = 230, RADIUS = 168;
+    const angleStep = 360 / this.defenseLayers.length;
+    const nodePositions = this.defenseLayers.map((l, idx) => {
+      const angle = (idx * angleStep - 90) * Math.PI / 180;
+      return { x: CX + RADIUS * Math.cos(angle), y: CY + RADIUS * Math.sin(angle) };
+    });
+    const defenseLayersView = this.defenseLayers.map((l, idx) => {
+      const on = s.deployedLayers.includes(l.id);
+      const pos = nodePositions[idx];
+      const menuOpen = s.openLayerMenuId === l.id;
+      return {
+        ...l, onClick: () => this.openLayerMenu(l.id),
+        nodeStyle: `position:absolute;left:${pos.x}px;top:${pos.y}px;transform:translate(-50%,-50%);width:104px;padding:10px 8px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;background:${on?'linear-gradient(160deg,rgba(53,208,255,.22),rgba(10,20,32,.92))':'rgba(20,24,34,.85)'};border:1px solid ${menuOpen?'#fff':(on?'#35d0ff':'rgba(255,255,255,.15)')};box-shadow:${on?'0 0 16px rgba(53,208,255,.45)':'0 2px 6px -2px rgba(0,0,0,.5)'};transition:box-shadow .25s,background .25s;z-index:${menuOpen?4:2}`,
+        iconStyle: `width:32px;height:32px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:15px;color:${on?'#eafcff':'rgba(255,255,255,.6)'};background:radial-gradient(circle at 30% 28%,${on?'#7fe6ff':'rgba(255,255,255,.35)'},${on?'#0f7fb0':'rgba(255,255,255,.06)'} 60%,${on?'#062a3a':'rgba(0,0,0,.3)'} 100%);box-shadow:inset 0 1px 2px rgba(255,255,255,.5),inset 0 -3px 6px rgba(0,0,0,.4)`,
+        statusLabel: on?'DEPLOYED':'IDLE',
+        statusStyle: `font:700 8px 'Chakra Petch';margin-top:5px;padding:2px 7px;border-radius:5px;background:${on?'rgba(53,208,255,.2)':'rgba(255,255,255,.06)'};color:${on?'#35d0ff':'rgba(255,255,255,.4)'}`,
+        menuOpen,
+        menuStyle: `position:absolute;left:${pos.x}px;top:${pos.y+52}px;transform:translateX(-50%);z-index:5;display:${menuOpen?'flex':'none'};flex-direction:column;gap:6px;background:#12151f;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;box-shadow:0 10px 24px -6px rgba(0,0,0,.6);min-width:150px`,
+        selectLabel: on ? 'ยกเลิกการเลือก' : 'ทำโจทย์เพื่อเลือก',
+        toggleSelect: on ? (() => this.toggleLayer(l.id)) : (() => this.openLayerDetail(l.id)),
+        openDetail: () => this.openLayerDetail(l.id)
+      };
+    });
+    const detailLayer = s.detailLayerId ? this.defenseLayers.find(l=>l.id===s.detailLayerId) : null;
+    const hasDetailLayer = !!detailLayer;
+    let detailLayerView = {label:'', icon:'', detail:'', deployed:false, question:'', optionsView:[], setupOptionsView:[], taskDone:false, setupTaskDone:false, showConfirm:false};
+    if (detailLayer) {
+      const taskDone = s.completedTasks.includes(detailLayer.id);
+      const setupTaskDone = s.completedSetupTasks.includes(detailLayer.id);
+      const deployed = s.deployedLayers.includes(detailLayer.id);
+      const optionsView = (detailLayer.options||[]).map(o => {
+        const showGreen = taskDone && o.correct;
+        return {
+          ...o, onClick: () => this.answerTask(detailLayer.id, o.id, o.correct),
+          style: `width:100%;text-align:left;padding:10px 12px;border-radius:8px;cursor:pointer;font:600 12px 'Noto Sans Thai';border:1px solid ${showGreen?'#2ecc71':(s.taskWrongId===o.id?'#ff4d4d':'rgba(255,255,255,.15)')};background:${showGreen?'rgba(46,204,113,.15)':(s.taskWrongId===o.id?'rgba(255,77,77,.12)':'rgba(255,255,255,.05)')};color:#fff`
+        };
+      });
+      const setupOptionsView = (detailLayer.setupOptions||[]).map(o => {
+        const showGreen = setupTaskDone && o.correct;
+        return {
+          ...o, onClick: () => this.answerSetupTask(detailLayer.id, o.id, o.correct),
+          style: `width:100%;text-align:left;padding:10px 12px;border-radius:8px;cursor:pointer;font:600 12px 'Noto Sans Thai';border:1px solid ${showGreen?'#2ecc71':(s.setupWrongId===o.id?'#ff4d4d':'rgba(255,255,255,.15)')};background:${showGreen?'rgba(46,204,113,.15)':(s.setupWrongId===o.id?'rgba(255,77,77,.12)':'rgba(255,255,255,.05)')};color:#fff`
+        };
+      });
+      const ackedQ1 = s.ackedQ1.includes(detailLayer.id);
+      const showConfirm = (taskDone && setupTaskDone) || deployed;
+      detailLayerView = {
+        ...detailLayer, deployed, taskDone, setupTaskDone, optionsView, setupOptionsView,
+        stepQ1: !ackedQ1 && !deployed, stepQ2: ackedQ1 && !setupTaskDone && !deployed,
+        ackNext: () => this.ackQ1(detailLayer.id),
+        showConfirm,
+        confirmLabel: deployed ? 'ยกเลิกการเลือก' : 'ยืนยันการเลือก',
+        onConfirm: () => this.confirmLayerFromDetail(detailLayer.id)
+      };
+    }
+    const defenseLinesView = this.defenseLayers.map((l, idx) => {
+      const on = s.deployedLayers.includes(l.id);
+      const pos = nodePositions[idx];
+      return {
+        x1: CX, y1: CY, x2: pos.x, y2: pos.y,
+        style: `stroke:${on?'#35d0ff':'rgba(255,255,255,.18)'};stroke-width:${on?2.5:1.4};stroke-dasharray:${on?'0':'4 5'};transition:stroke .3s`
+      };
+    });
+    const hubStyle = `position:absolute;left:${CX}px;top:${CY}px;transform:translate(-50%,-50%);width:104px;height:104px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:radial-gradient(circle at 35% 30%,#123a52,#04101a 72%);border:2px solid rgba(53,208,255,.55);box-shadow:0 0 ${16+shieldPct/3}px rgba(53,208,255,.5),inset 0 2px 4px rgba(255,255,255,.15);z-index:2`;
+    const attackTimelineView = this.attackSteps.map((st, idx) => {
+      const contained = !st.needs || s.deployedLayers.includes(st.needs);
+      return {
+        ...st,
+        statusLabel: contained? 'CONTAINED' : 'IN PROGRESS',
+        statusStyle: `font:700 9px 'Chakra Petch';padding:4px 9px;border-radius:6px;flex:none;background:${contained?'rgba(46,204,113,.15)':'rgba(255,77,77,.15)'};color:${contained?'#2ecc71':'#ff4d4d'}`,
+        rowStyle: `display:flex;align-items:center;gap:12px;padding:10px 12px;margin-bottom:8px;border-radius:10px;background:${contained?'rgba(255,255,255,.03)':'rgba(255,77,77,.06)'};border-left:3px solid ${contained?'rgba(46,204,113,.6)':'rgba(255,77,77,.6)'};border-top:1px solid rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)`,
+        orbStyle: `width:26px;height:26px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font:700 11px 'Chakra Petch';color:#fff;background:radial-gradient(circle at 30% 28%,${contained?'#9be8ff':'#ffb3ad'},${contained?'#1a8fbf':'#c0392b'} 60%,${contained?'#062a3a':'#3a0d08'} 100%);box-shadow:inset 0 1px 2px rgba(255,255,255,.5),inset 0 -2px 4px rgba(0,0,0,.5)`
+      };
+    });
+
+    return {
+      tabs,
+      isHome: s.activeScreen==='home', isMissionSelect: s.activeScreen==='missionSelect',
+      isJoiningRoom: s.activeScreen==='joiningRoom', isLoading: s.activeScreen==='loading',
+      isLiveControl: s.activeScreen==='liveControl', isFinalAttack: s.activeScreen==='finalAttack', isWinning: s.activeScreen==='winning',
+      isQuestionRound, isAnswerReveal, isHowToPlay, currentMission,
+      showEvidenceHint: s.showEvidenceHint, toggleEvidenceHint: () => this.toggleEvidenceHint(),
+      evidenceHintLabel: s.showEvidenceHint ? 'ซ่อนหลักฐาน (Hint)' : 'ดูหลักฐาน (Hint)',
+      goHowToPlay: () => this.goHowToPlay(), goHome: () => this.goHome(), goPlay: () => this.goPlay(),
+      showAnswer: () => this.showAnswer(),
+      goLeaderboardFromAnswer: () => this.goLeaderboardFromAnswer(),
+      goWinning: () => this.advanceRound(), winner, winningTitle,
+      podiumView, confettiView, othersView, hasOthers,
+      roundProgressLabel, nextRoundLabel, isLastRound,
+      correctPct, riskyPct, answeredLabel, submittedCount: s.submittedCount, livePlayerCount,
+      timeLeft: s.timeLeft, timeLeftStyle,
+      loadingSeconds: s.loadingSeconds,
+      howToSteps: this.howToSteps,
+      missionsView, catFilters, interFilters, selectedCount, noMissionSelected, missionNextStyle,
+      useRecommended: s.useRecommended, toggleRecommended: () => this.toggleRecommended(),
+      showCustomTime: !s.useRecommended, customTime: s.customTime, onTimeChange: (e) => this.onTimeChange(e),
+      goJoiningRoom: () => this.goJoiningRoom(),
+      difficultyChips, missionSequenceLabel,
+      pinDisplay, leaderboardTitle, joinUrl: s.joinUrl, qrDataUrl: s.qrDataUrl,
+      joinedCount: livePlayerCount, joinedPlayersView, startLoading: () => this.startLoading(),
+      leaderboardView, actionBars,
+      revealRecommended: s.revealRecommended, toggleReveal: () => this.toggleReveal(),
+      defenseLayersView, defenseLinesView, hubStyle, shieldPct, attackTimelineView,
+      hasDetailLayer, detailLayerView, closeLayerDetail: () => this.closeLayerDetail(),
+      stopPropagation: (e) => e.stopPropagation()
+    };
+  }
+}
+
+</script>
+</body>
+</html>
