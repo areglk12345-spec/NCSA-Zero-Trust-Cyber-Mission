@@ -28,22 +28,22 @@ a{color:#35d0ff}a:hover{color:#7de4ff}
 </style>
 </helmet>
 
-<div style="width:100%;min-height:100vh;background:#e7e9f0">
+<div style="width:100%;height:100dvh;background:#e7e9f0;display:flex;flex-direction:column;overflow:hidden">
 
-  <div style="position:sticky;top:0;z-index:50;background:#0b1024;border-bottom:1px solid rgba(255,255,255,.08);padding:14px 20px;display:flex;align-items:center;gap:18px;overflow-x:auto">
+  <div style="flex:none;background:#0b1024;border-bottom:1px solid rgba(255,255,255,.08);padding:14px 20px;display:flex;align-items:center;gap:18px;overflow-x:auto">
     <div style="display:flex;align-items:center;gap:8px;flex:none">
       <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#1c2f7a,#e2231c);display:flex;align-items:center;justify-content:center;font:700 12px 'Chakra Petch';color:#fff">N</div>
       <div style="font:700 14px 'Chakra Petch';color:#fff;white-space:nowrap">NCSA · Zero Trust Cyber Mission — Player (Web + Mobile)</div>
     </div>
   </div>
 
-  <div style="padding:var(--pad-top) var(--pad-x) 80px;display:flex;flex-direction:column;align-items:center;gap:16px;max-width:calc(var(--card-w) + 60px);margin:0 auto;width:100%">
-    <div style="font:600 11px 'Chakra Petch';letter-spacing:.08em;color:rgba(20,20,30,.45);text-transform:uppercase">{{ activeLabel }}</div>
+  <div style="flex:1;min-height:0;overflow-y:auto;padding:0 var(--pad-x);display:flex;flex-direction:column;align-items:center;gap:8px;max-width:calc(var(--card-w) + 60px);margin:0 auto;width:100%">
+    <div style="flex:none;padding-top:10px;font:600 11px 'Chakra Petch';letter-spacing:.08em;color:rgba(20,20,30,.45);text-transform:uppercase">{{ activeLabel }}</div>
 
     <!-- JOIN + LOBBY -->
     <sc-if value="{{ isJoin }}" hint-placeholder-val="{{ true }}">
-      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
-        <div style="border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#12205c,#1c2f7a);min-height:760px;display:flex;flex-direction:column;color:#fff;font-family:'Chakra Petch'">
+      <div style="width:100%;max-width:var(--card-w);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#12205c,#1c2f7a);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;color:#fff;font-family:'Chakra Petch'">
 
           <sc-if value="{{ isPinStep }}" hint-placeholder-val="{{ true }}">
             <div style="padding:28px 24px 18px;text-align:center;border-bottom:1px solid rgba(255,255,255,.12);animation:ncsa-fadeup .5s ease-out backwards">
@@ -113,8 +113,8 @@ a{color:#35d0ff}a:hover{color:#7de4ff}
 
     <!-- ALERT + BRIEFING -->
     <sc-if value="{{ isAlert }}" hint-placeholder-val="{{ true }}">
-      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
-        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:760px;display:flex;flex-direction:column;color:#fff">
+      <div style="width:100%;max-width:var(--card-w);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;color:#fff">
           <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)">
             <div style="font:600 11px 'Chakra Petch';letter-spacing:.06em;color:rgba(255,255,255,.5)">{{ roundLabel }}</div>
             <div style="font:700 11px 'Chakra Petch';color:#ff4d4d">{{ riskLabel }}</div>
@@ -137,8 +137,8 @@ a{color:#35d0ff}a:hover{color:#7de4ff}
 
     <!-- DECISION -->
     <sc-if value="{{ isDecision }}" hint-placeholder-val="{{ true }}">
-      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
-        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:800px;display:flex;flex-direction:column;color:#fff">
+      <div style="width:100%;max-width:var(--card-w);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;color:#fff">
           <div style="padding:14px 20px 10px;border-bottom:1px solid rgba(255,255,255,.08);animation:ncsa-fadeup .5s ease-out backwards">
             <div style="display:flex;justify-content:space-between;align-items:center">
               <div style="font:700 16px 'Chakra Petch'">Security Decision</div>
@@ -339,8 +339,8 @@ a{color:#35d0ff}a:hover{color:#7de4ff}
       </sc-if>
     </sc-if>
     <sc-if value="{{ isWaiting }}" hint-placeholder-val="{{ false }}">
-      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
-        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:400px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:16px;padding:40px 24px">
+      <div style="width:100%;max-width:var(--card-w);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:16px;padding:40px 24px">
           <div style="width:56px;height:56px;border-radius:50%;border:4px solid rgba(255,255,255,.15);border-top-color:#35d0ff;animation:ncsa-spin 1s linear infinite"></div>
           <div style="font:700 15px 'Chakra Petch';text-align:center">ส่งคำตอบแล้ว — รอผู้เล่นคนอื่น</div>
           <div style="font:500 12.5px 'Noto Sans Thai';color:rgba(255,255,255,.55);text-align:center;line-height:1.7">ระบบจะไปยังหน้าคำตอบเมื่อโฮสต์กดดูคำตอบจากหน้า Admin Console</div>
@@ -350,8 +350,8 @@ a{color:#35d0ff}a:hover{color:#7de4ff}
 
     <!-- OUTCOME -->
     <sc-if value="{{ isOutcome }}" hint-placeholder-val="{{ true }}">
-      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
-        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:760px;display:flex;flex-direction:column;color:#fff;align-items:center">
+      <div style="width:100%;max-width:var(--card-w);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;color:#fff;align-items:center">
           <div style="padding:40px 24px 18px;display:flex;flex-direction:column;align-items:center;gap:14px">
             <div style="{{ outcomeIconStyle }}">{{ outcomeIcon }}</div>
             <div style="font:700 20px 'Chakra Petch';text-align:center;animation:ncsa-fadeup .5s ease-out .15s backwards">{{ outcomeTitle }}</div>
@@ -389,8 +389,8 @@ a{color:#35d0ff}a:hover{color:#7de4ff}
 
     <!-- DEBRIEF -->
     <sc-if value="{{ isDebrief }}" hint-placeholder-val="{{ true }}">
-      <div style="width:100%;max-width:var(--card-w);margin:0 auto">
-        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:800px;display:flex;flex-direction:column;color:#fff">
+      <div style="width:100%;max-width:var(--card-w);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;margin:0 auto">
+        <div style="border-radius:16px;overflow:hidden;background:#0a0e1a;min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;color:#fff">
           <div style="padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08)">
             <div style="font:700 17px 'Chakra Petch'">ผลคะแนนจาก Leaderboard</div>
             <div style="font:500 11.5px 'Noto Sans Thai';color:rgba(255,255,255,.5);margin-top:4px">{{ roundLabel }}</div>

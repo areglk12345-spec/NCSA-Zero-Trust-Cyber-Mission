@@ -27,19 +27,19 @@ a{color:#e8f4ff}a:hover{color:#e2231c}
 </style>
 </helmet>
 
-<div style="min-height:100vh;background:transparent">
-  <div style="position:sticky;top:0;z-index:50;background:linear-gradient(90deg,#05070f,#0d1a33);padding:14px 28px;display:flex;align-items:center;gap:18px;overflow-x:auto;border-bottom:1px solid rgba(53,208,255,.25);box-shadow:0 0 20px -4px rgba(53,208,255,.3)">
+<div style="height:100dvh;background:transparent;display:flex;flex-direction:column;overflow:hidden">
+  <div style="flex:none;background:linear-gradient(90deg,#05070f,#0d1a33);padding:14px 28px;display:flex;align-items:center;gap:18px;overflow-x:auto;border-bottom:1px solid rgba(53,208,255,.25);box-shadow:0 0 20px -4px rgba(53,208,255,.3)">
     <div style="display:flex;align-items:center;gap:8px;flex:none">
       <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#1c2f7a,#e2231c);display:flex;align-items:center;justify-content:center;font:700 12px 'Chakra Petch';color:#fff">N</div>
       <div style="font:700 14px 'Chakra Petch';color:#fff;white-space:nowrap">NCSA · Admin Console (Website)</div>
     </div>
   </div>
 
-  <div style="min-height:calc(100vh - 58px);padding:36px var(--pad-x) 80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <div style="flex:1;min-height:0;overflow-y:auto;padding:0 var(--pad-x);display:flex;flex-direction:column;align-items:center;gap:16px">
 
     <!-- HOME -->
     <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
-      <div style="width:100%;max-width:var(--w-md);border-radius:24px;overflow:hidden;background:linear-gradient(160deg,#0a0e1a,#12205c 55%,#1c2f7a);box-shadow:0 30px 80px -30px rgba(0,0,0,.5);color:#fff">
+      <div style="width:100%;max-width:var(--w-md);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;border-radius:24px;overflow:hidden;background:linear-gradient(160deg,#0a0e1a,#12205c 55%,#1c2f7a);box-shadow:0 30px 80px -30px rgba(0,0,0,.5);color:#fff">
         <div style="padding:90px 40px 100px;text-align:center">
           <div style="font:700 12px 'Chakra Petch';letter-spacing:.16em;opacity:.6">NCSA PRESENTS</div>
           <div style="font:700 46px 'Chakra Petch';margin-top:16px;letter-spacing:.02em">ZERO TRUST<br/>CYBER MISSION</div>
@@ -54,7 +54,7 @@ a{color:#e8f4ff}a:hover{color:#e2231c}
 
     <!-- HOW TO PLAY -->
     <sc-if value="{{ isHowToPlay }}" hint-placeholder-val="{{ false }}">
-      <div style="width:100%;max-width:var(--w-md);border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
+      <div style="width:100%;max-width:var(--w-md);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
         <div style="padding:32px 40px 24px;border-bottom:1px solid #eceef4">
           <div style="font:700 22px 'Chakra Petch';color:#e8f4ff">How to Play</div>
           <div style="font:500 12.5px 'Noto Sans Thai';color:#8fa3c4;margin-top:6px">ภาพรวมขั้นตอนของแต่ละ Mission ที่ผู้เล่นจะพบตลอดเกม</div>
@@ -81,7 +81,7 @@ a{color:#e8f4ff}a:hover{color:#e2231c}
 
     <!-- MISSION SELECT -->
     <sc-if value="{{ isMissionSelect }}" hint-placeholder-val="{{ true }}">
-      <div style="width:100%;max-width:var(--w-lg);border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
+      <div style="width:100%;max-width:var(--w-lg);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
         <div style="padding:22px 28px;border-bottom:1px solid #eceef4;display:flex;justify-content:space-between;align-items:center">
           <div style="font:700 19px 'Chakra Petch';color:#e8f4ff">เลือก Mission (เลือกได้มากกว่า 1)</div>
           <div style="font:600 12px 'Chakra Petch';color:#7a91b3">20 Missions ทั้งหมด · เลือกแล้ว {{ selectedCount }} รายการ</div>
@@ -151,7 +151,7 @@ a{color:#e8f4ff}a:hover{color:#e2231c}
 
     <!-- JOINING ROOM (HOST) -->
     <sc-if value="{{ isJoiningRoom }}" hint-placeholder-val="{{ true }}">
-      <div style="width:100%;max-width:var(--w-md);border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
+      <div style="width:100%;max-width:var(--w-md);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
         <div style="padding:32px 40px;text-align:center;background:linear-gradient(180deg,#12205c,#1c2f7a);color:#fff">
           <div style="font:600 12px 'Chakra Petch';letter-spacing:.1em;opacity:.7">GAME PIN</div>
           <div style="font:700 46px 'Chakra Petch';letter-spacing:.06em;margin-top:6px">{{ pinDisplay }}</div>
@@ -189,7 +189,7 @@ a{color:#e8f4ff}a:hover{color:#e2231c}
 
     <!-- QUESTION SCENARIO (regular round) -->
     <sc-if value="{{ isQuestionRound }}" hint-placeholder-val="{{ false }}">
-      <div style="width:100%;max-width:var(--w-sm);border-radius:18px;background:#0a0e1a;color:#fff;overflow:hidden;box-shadow:0 20px 60px -30px rgba(0,0,0,.6)">
+      <div style="width:100%;max-width:var(--w-sm);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;border-radius:18px;background:#0a0e1a;color:#fff;overflow:hidden;box-shadow:0 20px 60px -30px rgba(0,0,0,.6)">
         <div style="padding:16px 32px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">
           <div style="font:600 11px 'Chakra Petch';letter-spacing:.06em;color:rgba(255,255,255,.5)">{{ roundProgressLabel }}</div>
           <div style="font:700 11px 'Chakra Petch';color:#ff4d4d">{{ currentMission.riskLabel }}</div>
@@ -235,7 +235,7 @@ a{color:#e8f4ff}a:hover{color:#e2231c}
 
     <!-- ANSWER REVEAL -->
     <sc-if value="{{ isAnswerReveal }}" hint-placeholder-val="{{ false }}">
-      <div style="width:100%;max-width:var(--w-md);border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
+      <div style="width:100%;max-width:var(--w-md);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
         <div style="padding:20px 32px;border-bottom:1px solid #eceef4">
           <div style="font:600 11px 'Chakra Petch';letter-spacing:.06em;color:#7a91b3">{{ roundProgressLabel }}</div>
           <div style="font:700 19px 'Chakra Petch';color:#e8f4ff;margin-top:4px">คำตอบและคำอธิบาย</div>
@@ -269,7 +269,7 @@ a{color:#e8f4ff}a:hover{color:#e2231c}
 
     <!-- LIVE CONTROL / LEADERBOARD -->
     <sc-if value="{{ isLiveControl }}" hint-placeholder-val="{{ true }}">
-      <div style="width:100%;max-width:var(--w-lg);border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
+      <div style="width:100%;max-width:var(--w-lg);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;border-radius:18px;background:linear-gradient(160deg,rgba(20,28,48,.9),rgba(10,14,26,.95));border:1px solid rgba(53,208,255,.25);box-shadow:0 0 40px -10px rgba(53,208,255,.15),0 20px 50px -30px rgba(0,0,0,.6);backdrop-filter:blur(6px);overflow:hidden">
         <div style="padding:22px 28px;border-bottom:1px solid #eceef4;display:flex;justify-content:space-between;align-items:center">
           <div>
             <div style="font:700 19px 'Chakra Petch';color:#e8f4ff">{{ leaderboardTitle }}</div>
@@ -328,7 +328,7 @@ a{color:#e8f4ff}a:hover{color:#e2231c}
 
     <!-- WINNING -->
     <sc-if value="{{ isWinning }}" hint-placeholder-val="{{ false }}">
-      <div style="width:100%;max-width:var(--w-tall);border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#0a0e2e,#1c2f7a);color:#fff;box-shadow:0 20px 60px -30px rgba(0,0,0,.5);position:relative">
+      <div style="width:100%;max-width:var(--w-tall);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#0a0e2e,#1c2f7a);color:#fff;box-shadow:0 20px 60px -30px rgba(0,0,0,.5);position:relative">
         <div style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;pointer-events:none;z-index:0">
           <sc-for list="{{ confettiView }}" as="c" hint-placeholder-count="24">
             <div style="{{ c.style }}"></div>
@@ -373,7 +373,7 @@ a{color:#e8f4ff}a:hover{color:#e2231c}
 
     <!-- FINAL ZERO TRUST ATTACK (final round question) -->
     <sc-if value="{{ isFinalAttack }}" hint-placeholder-val="{{ false }}">
-      <div style="width:100%;max-width:var(--w-lg);border-radius:18px;background:#0a0e1a;border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 60px -30px rgba(0,0,0,.6);overflow:hidden;color:#fff">
+      <div style="width:100%;max-width:var(--w-lg);min-height:100%;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;border-radius:18px;background:#0a0e1a;border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 60px -30px rgba(0,0,0,.6);overflow:hidden;color:#fff">
         <div style="padding:22px 28px;border-bottom:1px solid rgba(255,255,255,.08)">
           <div style="font:700 19px 'Chakra Petch'">Final Zero Trust Attack — Defense Layer Builder</div>
           <div style="font:500 12px 'Noto Sans Thai';color:rgba(255,255,255,.5);margin-top:4px">เลือกมาตรการที่ปลดล็อกมาวางใน Defense Layer ก่อนการโจมตีเริ่มขึ้น</div>
