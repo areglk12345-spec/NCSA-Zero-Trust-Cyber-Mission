@@ -642,9 +642,9 @@ function scoreAnswer(mission, answer) {
   switch (mission.interaction) {
     case 'single': {
       const opt = (mission.options || []).find((o) => o.id === answer?.optionId);
-      const POINTS = { recommended: 100, acceptable: 60, risky: 30, dangerous: 10 };
-      const points = opt ? POINTS[opt.tag] ?? 0 : 0;
-      return { points, choiceText: opt ? opt.title : '—', correct: opt ? opt.tag === 'recommended' : false };
+      const correct = opt ? opt.tag === 'recommended' : false;
+      const points = correct ? 100 : 0;
+      return { points, choiceText: opt ? opt.title : '—', correct };
     }
     case 'multi': {
       const selected = Array.isArray(answer?.selectedIds) ? answer.selectedIds : [];
