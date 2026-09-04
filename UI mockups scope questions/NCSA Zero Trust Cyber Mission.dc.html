@@ -23,7 +23,7 @@ a{color:#35d0ff}a:hover{color:#7de4ff}
 @keyframes ncsa-fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes ncsa-popin{0%{opacity:0;transform:scale(.4)}100%{opacity:1;transform:scale(1)}}
 @keyframes ncsa-shieldfill{from{width:0%}to{width:82%}}
-:root{--card-w:min(680px,94vw);--pad-x:16px;--pad-top:36px;--single-cols:1fr}
+:root{--card-w:100%;--pad-x:0px;--pad-top:20px;--single-cols:1fr}
 @media (min-width:860px){:root{--card-w:100%;--pad-x:0px;--pad-top:56px;--single-cols:1fr 1fr}}
 </style>
 </helmet>
@@ -248,9 +248,11 @@ a{color:#35d0ff}a:hover{color:#7de4ff}
             </div>
           </sc-if>
 
-          <div style="padding:16px 20px 26px;margin-top:auto">
-            <button onClick="{{ stepPrimaryAction }}" disabled="{{ cannotSubmit }}" style="{{ submitStyle }}">{{ stepPrimaryLabel }}</button>
-          </div>
+          <sc-if value="{{ showPrimaryButton }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:16px 20px 26px;margin-top:auto">
+              <button onClick="{{ stepPrimaryAction }}" disabled="{{ cannotSubmit }}" style="{{ submitStyle }}">{{ stepPrimaryLabel }}</button>
+            </div>
+          </sc-if>
         </div>
       </div>
 
@@ -536,7 +538,13 @@ class Component extends DCLogic {
   toggleMissionPopup(){ this.setState(s=>({showMissionPopup: !s.showMissionPopup})); }
   closeMissionPopup(){ this.setState({showMissionPopup:false}); }
   goDecision(){ this.setState({activeScreen:'decision'}); }
-  selectSingle(id){ this.setState({selectedActionId:id}); }
+  selectSingle(id){
+    const s = this.state;
+    if (s.selectedActionId) return;
+    this.setState({selectedActionId:id});
+    this.socket.emit('player:submitAnswer', { pin: s.pin, answer: { optionId: id } }, () => {});
+    setTimeout(() => this.setState({activeScreen:'waiting'}), 350);
+  }
   toggleMulti(id){
     const required = (this.state.roundMission || {}).requiredCount || 3;
     this.setState(s=>{
@@ -628,12 +636,13 @@ class Component extends DCLogic {
     ];
     const singleActionsView = (mission.options || []).map((a, idx) => {
       const sel = s.selectedActionId===a.id;
+      const locked = !!s.selectedActionId;
       const shape = kahootShapes[idx % kahootShapes.length];
       return {
         ...a, onClick: () => this.selectSingle(a.id),
         shapeIcon: shape.icon,
         shapeStyle: `flex:none;width:34px;height:34px;border-radius:8px;background:${shape.color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px`,
-        cardStyle: `text-align:left;width:100%;padding:14px;border-radius:12px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.04);border-left:4px solid ${shape.color};border-top:1px solid rgba(255,255,255,.09);border-right:1px solid rgba(255,255,255,.09);border-bottom:1px solid rgba(255,255,255,.09);${sel?`box-shadow:0 0 0 2px ${shape.color};`:''}`
+        cardStyle: `text-align:left;width:100%;padding:14px;border-radius:12px;cursor:${locked?'default':'pointer'};display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.04);border-left:4px solid ${shape.color};border-top:1px solid rgba(255,255,255,.09);border-right:1px solid rgba(255,255,255,.09);border-bottom:1px solid rgba(255,255,255,.09);transition:opacity .25s,box-shadow .25s;${sel?`box-shadow:0 0 0 2px ${shape.color};`:''}${locked&&!sel?'opacity:.35;':''}`
       };
     });
 
@@ -672,17 +681,19 @@ class Component extends DCLogic {
     const totalLayers = layers.length;
     const shieldPct = totalLayers ? Math.round((deployedCount / totalLayers) * 100) : 0;
     const CX = 230, CY = 230, RADIUS = 168;
+    const PCT = (v) => (v / 460 * 100);
     const angleStep = layers.length ? 360 / layers.length : 0;
     const nodePositions = layers.map((l, idx) => {
       const angle = (idx * angleStep - 90) * Math.PI / 180;
       return { x: CX + RADIUS * Math.cos(angle), y: CY + RADIUS * Math.sin(angle) };
     });
+    const nodeSizePct = (104 / 460 * 100);
     const defenseLayersView = layers.map((l, idx) => {
       const on = s.deployedLayers.includes(l.id);
       const pos = nodePositions[idx];
       return {
         ...l, onClick: () => this.openLayerDetail(l.id),
-        nodeStyle: `position:absolute;left:${pos.x}px;top:${pos.y}px;transform:translate(-50%,-50%);width:104px;padding:10px 8px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;background:${on?'linear-gradient(160deg,rgba(53,208,255,.22),rgba(10,20,32,.92))':'rgba(20,24,34,.85)'};border:1px solid ${on?'#35d0ff':'rgba(255,255,255,.15)'};box-shadow:${on?'0 0 16px rgba(53,208,255,.45)':'0 2px 6px -2px rgba(0,0,0,.5)'};transition:box-shadow .25s,background .25s;z-index:2`,
+        nodeStyle: `position:absolute;left:${PCT(pos.x)}%;top:${PCT(pos.y)}%;transform:translate(-50%,-50%);width:${nodeSizePct}%;min-width:72px;max-width:104px;padding:10px 8px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;background:${on?'linear-gradient(160deg,rgba(53,208,255,.22),rgba(10,20,32,.92))':'rgba(20,24,34,.85)'};border:1px solid ${on?'#35d0ff':'rgba(255,255,255,.15)'};box-shadow:${on?'0 0 16px rgba(53,208,255,.45)':'0 2px 6px -2px rgba(0,0,0,.5)'};transition:box-shadow .25s,background .25s;z-index:2`,
         iconStyle: `width:32px;height:32px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:15px;color:${on?'#eafcff':'rgba(255,255,255,.6)'};background:radial-gradient(circle at 30% 28%,${on?'#7fe6ff':'rgba(255,255,255,.35)'},${on?'#0f7fb0':'rgba(255,255,255,.06)'} 60%,${on?'#062a3a':'rgba(0,0,0,.3)'} 100%);box-shadow:inset 0 1px 2px rgba(255,255,255,.5),inset 0 -3px 6px rgba(0,0,0,.4)`,
         statusLabel: on?'DEPLOYED':'IDLE',
         statusStyle: `font:700 8px 'Chakra Petch';margin-top:5px;padding:2px 7px;border-radius:5px;background:${on?'rgba(53,208,255,.2)':'rgba(255,255,255,.06)'};color:${on?'#35d0ff':'rgba(255,255,255,.4)'}`
@@ -696,7 +707,7 @@ class Component extends DCLogic {
         style: `stroke:${on?'#35d0ff':'rgba(255,255,255,.18)'};stroke-width:${on?2.5:1.4};stroke-dasharray:${on?'0':'4 5'};transition:stroke .3s`
       };
     });
-    const hubStyle = `position:absolute;left:${CX}px;top:${CY}px;transform:translate(-50%,-50%);width:104px;height:104px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:radial-gradient(circle at 35% 30%,#123a52,#04101a 72%);border:2px solid rgba(53,208,255,.55);box-shadow:0 0 ${16+shieldPct/3}px rgba(53,208,255,.5),inset 0 2px 4px rgba(255,255,255,.15);z-index:2`;
+    const hubStyle = `position:absolute;left:${PCT(CX)}%;top:${PCT(CY)}%;transform:translate(-50%,-50%);width:${nodeSizePct}%;min-width:72px;max-width:104px;aspect-ratio:1/1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:radial-gradient(circle at 35% 30%,#123a52,#04101a 72%);border:2px solid rgba(53,208,255,.55);box-shadow:0 0 ${16+shieldPct/3}px rgba(53,208,255,.5),inset 0 2px 4px rgba(255,255,255,.15);z-index:2`;
     const detailLayer = s.detailLayerId ? layers.find(l=>l.id===s.detailLayerId) : null;
     const hasDetailLayer = !!detailLayer;
     let detailLayerView = {label:'', icon:'', question:'', optionsView:[], setupOptionsView:[], taskDone:false, setupTaskDone:false, deployed:false, stepQ1:false, stepQ2:false};
@@ -738,6 +749,7 @@ class Component extends DCLogic {
       : isPatternDefense ? true
       : false;
     const submitStyle = `width:100%;padding:15px;border:none;border-radius:12px;font:700 14px 'Chakra Petch';letter-spacing:.04em;cursor:${canSubmit?'pointer':'not-allowed'};background:${canSubmit?'#e2231c':'rgba(255,255,255,.08)'};color:${canSubmit?'#fff':'rgba(255,255,255,.35)'}`;
+    const showPrimaryButton = !isPatternSingle;
     const patternHeading = `รูปแบบคำถาม: ${this.interactionLabels[mission.interaction] || ''}`;
     const timeLeftStyle = `font:700 12px 'Chakra Petch';padding:4px 9px;border-radius:6px;background:${s.timeLeft<=10?'rgba(255,77,77,.18)':'rgba(53,208,255,.12)'};color:${s.timeLeft<=10?'#ff8a80':'#35d0ff'}`;
 
@@ -789,7 +801,7 @@ class Component extends DCLogic {
       showFinalConfirm: s.showFinalConfirm, cancelFinalConfirm: () => this.cancelFinalConfirm(), confirmFinal: () => this.confirmFinal(),
       showMissionPopup: s.showMissionPopup, toggleMissionPopup: () => this.toggleMissionPopup(), closeMissionPopup: () => this.closeMissionPopup(),
       stopPropagation: (e) => e.stopPropagation(),
-      cannotSubmit: !canSubmit, submitStyle,
+      cannotSubmit: !canSubmit, submitStyle, showPrimaryButton,
       roundResult, outcomeIcon, outcomeIconStyle, outcomeTitle, outcomeBarStyle, showSpeedBonus, speedBonusLabel,
       myRank, myScore, leaderboardRowsView,
       isGameOver: s.isGameOver, isWaitingNextRound: !s.isGameOver
