@@ -32,11 +32,6 @@ a{color:#e8f4ff}a:hover{color:#e2231c}
       <div style="width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#1c2f7a,#e2231c);display:flex;align-items:center;justify-content:center;font:700 12px 'Chakra Petch';color:#fff">N</div>
       <div style="font:700 14px 'Chakra Petch';color:#fff;white-space:nowrap">NCSA · Admin Console (Website)</div>
     </div>
-    <div style="display:flex;gap:6px;flex:none">
-      <sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="6">
-        <button onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</button>
-      </sc-for>
-    </div>
   </div>
 
   <div style="padding:36px 28px 80px;display:flex;flex-direction:column;align-items:center;gap:16px">
@@ -538,11 +533,6 @@ class Component extends DCLogic {
     {id:'easy', label:'ง่าย'}, {id:'medium', label:'กลาง'}, {id:'hard', label:'ยาก'}
   ];
 
-  screensData = [
-    {id:'home', label:'Home'},
-    {id:'missionSelect', label:'Mission Select'}
-  ];
-
   howToSteps = [
     {n:1, title:'Mission Alert', desc:'ระบบแจ้งเตือนเหตุการณ์ด้านความมั่นคงปลอดภัยไซเบอร์ที่ตรวจพบ'},
     {n:2, title:'Situation Briefing', desc:'สรุปสถานการณ์แบบกระชับ: เกิดอะไรขึ้น กับใคร เมื่อไหร่ และผลกระทบ'},
@@ -711,7 +701,6 @@ class Component extends DCLogic {
     {step:8, text:'Zero Trust Shield สรุปผลการป้องกัน', needs:null}
   ];
 
-  setScreen(id){ this.setState({activeScreen:id}); }
   goHowToPlay(){ this.setState({activeScreen:'howToPlay'}); }
   goHome(){ this.setState({activeScreen:'home'}); }
   goPlay(){ this.setState({activeScreen:'missionSelect'}); }
@@ -837,19 +826,12 @@ class Component extends DCLogic {
     this.setState({detailLayerId:null});
   }
 
-  tabBtnStyle(active){
-    return `padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font:600 11.5px 'Chakra Petch';white-space:nowrap;background:${active?'#e2231c':'rgba(255,255,255,.12)'};color:#fff`;
-  }
   chipStyle(active){
     return `padding:7px 13px;border-radius:20px;border:1px solid ${active?'#35d0ff':'rgba(53,208,255,.2)'};cursor:pointer;font:600 11.5px 'Chakra Petch';background:${active?'linear-gradient(135deg,#35d0ff,#a78bfa)':'rgba(255,255,255,.04)'};color:${active?'#05070f':'#a9c2e0'}`;
   }
 
   renderVals() {
     const s = this.state;
-    const tabs = this.screensData.map(sc => ({
-      label: sc.label, onClick: () => this.setScreen(sc.id),
-      style: this.tabBtnStyle(s.activeScreen===sc.id)
-    }));
 
     const missionsView = this.missions
       .filter(m => s.catFilter==='all' || m.category===s.catFilter)
@@ -1028,7 +1010,6 @@ class Component extends DCLogic {
     });
 
     return {
-      tabs,
       isHome: s.activeScreen==='home', isMissionSelect: s.activeScreen==='missionSelect',
       isJoiningRoom: s.activeScreen==='joiningRoom', isLoading: s.activeScreen==='loading',
       isLiveControl: s.activeScreen==='liveControl', isFinalAttack: s.activeScreen==='finalAttack', isWinning: s.activeScreen==='winning',
